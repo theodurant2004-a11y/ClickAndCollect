@@ -1,8 +1,69 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<Article>
+@{
+    ViewData["Title"] = "Catalog";
+    List<string> categories = ViewBag.Categories as List<string>;
+    string? selectedCategory = Context.Request.Query["category"];
+    selectedCategory = string.IsNullOrEmpty(selectedCategory) ? null : selectedCategory;
 }
+<h1 class="mb-4">Product List</h1>
+<div class="d-flex flex-column flex-md-row">
+    <div class="p-3 rounded-3 me-3"
+         style="width: 25%; min-width: 200px; background-color: #eef4f7;
+                position: sticky; top: 20px; height: fit-content;">
+        <h5 class="fw-bold mb-3">Refine your search</h5>
+        <form method="get" asp-action="Index">
+            <p class="fw-bold mb-2">Categories</p>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="category" value=""
+                       @(selectedCategory == null ? "checked" : "") />
+                <label class="form-check-label fst-italic">All</label>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    @for (int i = 0; i < categories.Count; i += 2)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="category" value="@categories[i]" id="cat_@categories[i]"
+                                   @(selectedCategory == categories[i] ? "checked" : "") />
+                            <label class="form-check-label fst-italic" for="cat_@categories[i]">@categories[i]</label>
+                        </div>
+                    }
+                </div>
+                <div class="col-6">
+                    @for (int i = 1; i < categories.Count; i += 2)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="category" value="@categories[i]" id="cat_@categories[i]"
+                                   @(selectedCategory == categories[i] ? "checked" : "") />
+                            <label class="form-check-label fst-italic" for="cat_@categories[i]">@categories[i]</label>
+                        </div>
+                    }
+                </div>
+            </div>
+            <button type="submit" class="btn btn-sm text-white mt-3 w-100"
+                    style="background-color: #00bcd4;">
+                Filter
+            </button>
+        </form>
+    </div>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    
+
+    <div style="width: 75%;">
+        @if (Model.Count == 0)
+        {
+            <div class="text-center py-5">
+                <h4 class="fw-bold">No products found</h4>
+                <p class="text-muted">No products match your search. Try again later.</p>
+            </div>
+        }
+        <div class="row row-cols-1 row-cols-sm-1 row-cols-md-3 g-4">
+            @foreach (Article article in Model)
+            {
+                <div class="col">
+                    <partial name="_ViewArticle" model="article" />
+                </div>
+            }
+        </div>
+    </div>
 </div>
