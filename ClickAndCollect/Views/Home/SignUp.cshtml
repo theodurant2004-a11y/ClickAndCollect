@@ -14,28 +14,33 @@
             <div class="row g-2 mb-3">
                 <div class="col-6">
                     <label asp-for="FirstName" class="form-label fw-semibold"></label>
-                    <input asp-for="FirstName" class="form-control rounded-pill border-dark" />
+                    <input asp-for="FirstName" class="form-control rounded-pill border-dark"
+                        placeholder="John"/>
                     <span asp-validation-for="FirstName" class="text-danger small"></span>
                 </div>
                 <div class="col-6">
                     <label asp-for="SurName" class="form-label fw-semibold"></label>
-                    <input asp-for="SurName" class="form-control rounded-pill border-dark" />
+                    <input asp-for="SurName" class="form-control rounded-pill border-dark"
+                        placeholder="Doe"/>
                     <span asp-validation-for="SurName" class="text-danger small"></span>
                 </div>
             </div>
             <div class="mb-3">
                 <label asp-for="Email" class="form-label fw-semibold"></label>
-                <input asp-for="Email" class="form-control rounded-pill border-dark" />
+                <input asp-for="Email" class="form-control rounded-pill border-dark"
+                    placeholder="john.doe@example.com"/>
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="Phone" class="form-label fw-semibold"></label>
-                <input asp-for="Phone" class="form-control rounded-pill border-dark" />
+                <input asp-for="Phone" class="form-control rounded-pill border-dark"
+                    placeholder="+1234567890"/>
                 <span asp-validation-for="Phone" class="text-danger small"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="Address" class="form-label fw-semibold"></label>
-                <input asp-for="Address" class="form-control rounded-pill border-dark" />
+                <input asp-for="Address" class="form-control rounded-pill border-dark"
+                    placeholder="road example 123, 1234 Postal Code"/>
                 <span asp-validation-for="Address" class="text-danger small"></span>
             </div>
             <div class="mb-4">
