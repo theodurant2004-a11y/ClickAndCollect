@@ -110,6 +110,12 @@ namespace ClickAndCollect.Controllers
             return RedirectToAction("Profile");
         }
 
+        public IActionResult ShoppingCart()
+        {
+            bool shoppingCartExists = HttpContext.Session.GetInt32("ShoppingCart") == 1;
+            return View(shoppingCartExists);
+        }
+
         public IActionResult Privacy()
         {
             return View();
