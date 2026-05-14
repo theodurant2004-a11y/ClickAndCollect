@@ -9,7 +9,8 @@ builder.Services.AddControllersWithViews();
 string? connectionString = builder.Configuration.GetConnectionString("default");
 builder.Services.AddTransient<IArticleDAL>(aDal => new ArticleDAL(connectionString));
 builder.Services.AddTransient<ICategoryDAL>(catDal => new CategoryDAL(connectionString));
-builder.Services.AddTransient<IClientDAL>(clientDal => new ClientDAL(connectionString));
+builder.Services.AddTransient<IClientDAL>(sp => new ClientDAL(connectionString));
+builder.Services.AddTransient<IEmployeeDAL>(empDal => new EmployeeDAL(connectionString));
 
 // Add session services
 builder.Services.AddSession(options =>
