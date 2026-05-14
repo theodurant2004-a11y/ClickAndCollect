@@ -5,23 +5,64 @@ namespace ClickAndCollect.Models
 {
     public class Client : User
     {
-        private string? phone;
-        private string? address;
+        private string phone;
+        private string roadName;
+        private string roadNumber;
+        private string city;
+        private string postalCode;
 
-        [Display(Name = "Address")]
-        public string? Address
+        [Display(Name = "Road Name")]
+        [Required(ErrorMessage = "Road name is required.")]
+        public string RoadName
         {
-            get { return address; }
+            get { return roadName; }
             set
             {
                 ArgumentNullException.ThrowIfNull(value);
-                address = value;
+                roadName = value;
+            }
+        }
+
+        [Display(Name = "Road Number")]
+        [Required(ErrorMessage = "Road number is required.")]
+        public string RoadNumber
+        {
+            get { return roadNumber; }
+            set
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                roadNumber = value;
+            }
+        }
+
+        [Display(Name = "City")]
+        [Required(ErrorMessage = "City is required.")]
+        public string City
+        {
+            get { return city; }
+            set
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                city = value;
+            }
+        }
+
+        [Display(Name = "Postal Code")]
+        [Required(ErrorMessage = "Postal code is required.")]
+        public string PostalCode
+        {
+            get { return postalCode; }
+            set
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                postalCode = value;
             }
         }
 
         [Display(Name = "Phone Number")]
+        [Required(ErrorMessage = "Phone number is required.")]
         [DataType(DataType.PhoneNumber)]
-        public string? Phone
+        public string Phone
         {
             get { return phone; }
             set
@@ -31,15 +72,16 @@ namespace ClickAndCollect.Models
             }
         }
 
-        public Client()
-        { 
-        }
+        public Client() { }
 
-        public Client(int _id, string _firstName, string _surName, string _email, string _password, string _phone, string _address)
+        public Client(int _id, string _firstName, string _surName, string _email, string _password, string _phone, string _roadName, string _roadNumber, string _city, string _postalCode)
             : base(_id, _firstName, _surName, _email, _password)
         {
             Phone = _phone;
-            Address = _address;
+            RoadName = _roadName;
+            RoadNumber = _roadNumber;
+            City = _city;
+            PostalCode = _postalCode;
         }
 
         public static async Task<Client> GetClientByEmail(IClientDAL _dAL, string _email)

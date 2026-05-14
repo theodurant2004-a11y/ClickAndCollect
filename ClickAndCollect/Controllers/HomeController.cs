@@ -65,9 +65,16 @@ namespace ClickAndCollect.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
-            return View();
+            if(HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to view your profile."; 
+                return RedirectToAction("SignUp");
+            }
+            string email = HttpContext.Session.GetString("Email");
+            Client user = await Client.GetClientByEmail(clientDAL, email);
+            return View(user);
         }
 
         public IActionResult Privacy()
