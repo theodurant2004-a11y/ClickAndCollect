@@ -77,6 +77,39 @@ namespace ClickAndCollect.Controllers
             return View(user);
         }
 
+        public async Task<IActionResult> EditProfile()
+        {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to edit your profile.";
+                return RedirectToAction("SignUp");
+            }
+            string email = HttpContext.Session.GetString("Email");
+            Client user = await Client.GetClientByEmail(clientDAL, email);
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(Client user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(user);
+            }
+            int? clientId = HttpContext.Session.GetInt32("Id");
+            //modification du user en DB
+            int rows = await clientDAL.UpdateClientInfo(clientId, user);
+
+            if(rows == 0)
+            {
+                //erreur pendant la modification du compte
+            }
+
+            HttpContext.Session.SetString("FirstName", user.FirstName);
+            return RedirectToAction("Profile");
+        }
+
         public IActionResult Privacy()
         {
             return View();

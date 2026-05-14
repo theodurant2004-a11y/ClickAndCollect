@@ -93,5 +93,10 @@ namespace ClickAndCollect.Models
         {
             return await _dAL.AddClientAsync(_client);
         }
+
+        public async Task<int> UpdateClientInfo(IClientDAL _dAL, int? _id, Client _client)
+        {
+            return await _dAL.UpdateClientInfo(_id, _client);
+        }
     }
 }

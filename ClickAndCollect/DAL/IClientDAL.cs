@@ -7,5 +7,7 @@ namespace ClickAndCollect.DAL
         Task<Client> GetClientByEmail(string _email);
 
         Task<int> AddClientAsync(Client client);
+
+        Task<int> UpdateClientInfo(int? _id, Client _client);
     }
 }
