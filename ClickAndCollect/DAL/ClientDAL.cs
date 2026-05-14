@@ -70,19 +70,17 @@ namespace ClickAndCollect.DAL
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 SqlCommand cmd = new SqlCommand(
-                    @"
-              DECLARE @PostalCodeID INT;
-              SELECT @PostalCodeID = postalCodeID 
-              FROM PostalCode 
-              WHERE postalCode = @PostalCode AND cityName = @CityName;
+                    @"DECLARE @PostalCodeID INT;
+                      SELECT @PostalCodeID = postalCodeID 
+                      FROM PostalCode 
+                      WHERE postalCode = @PostalCode AND cityName = @CityName;
 
-              
-              IF @PostalCodeID IS NULL
-              BEGIN
-                  INSERT INTO PostalCode (postalCode, cityName)
-                  VALUES (@PostalCode, @CityName);
-                  SET @PostalCodeID = SCOPE_IDENTITY();
-              END
+                      IF @PostalCodeID IS NULL
+                      BEGIN
+                          INSERT INTO PostalCode (postalCode, cityName)
+                          VALUES (@PostalCode, @CityName);
+                          SET @PostalCodeID = SCOPE_IDENTITY();
+                      END
 
               
               INSERT INTO Address (roadName, roadNumber, postalCodeID)
