@@ -62,8 +62,12 @@ namespace ClickAndCollect.Controllers
             HttpContext.Session.SetString("FirstName", user.FirstName);
             HttpContext.Session.SetString("Type", "Client");
 
-
             return RedirectToAction("Index");
+        }
+
+        public IActionResult Profile()
+        {
+            return View();
         }
 
         public IActionResult Privacy()
