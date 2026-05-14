@@ -9,11 +9,13 @@ namespace ClickAndCollect.Controllers
     {
         private readonly IArticleDAL articleDAL;
         private readonly ICategoryDAL categoryDAL;
+        private readonly IClientDAL clientDAL;
 
-        public HomeController(IArticleDAL _articleDAL, ICategoryDAL _categoryDAL)
+        public HomeController(IArticleDAL _articleDAL, ICategoryDAL _categoryDAL, IClientDAL _clientDAL)
         {
             articleDAL = _articleDAL;
             categoryDAL = _categoryDAL;
+            clientDAL = _clientDAL;
         }
 
         public async Task<IActionResult> Index(string? category)
@@ -33,6 +35,35 @@ namespace ClickAndCollect.Controllers
         public IActionResult SignUp()
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SignUp(Client user)
+        {
+            if(!ModelState.IsValid)
+            {
+                return View(user);
+            }
+            //verfier si le mail existe en DB
+            if(await Client.GetClientByEmail(clientDAL, user.Email) != null)
+            {
+                ModelState.AddModelError("Email", "This email is already in use.");
+                return View(user);
+            }
+            // ajouter le user en DB et récuperer son id pour session
+            int clientId = await user.AddClientAsync(clientDAL, user);
+            if(clientId == -1)
+            {
+                //erreur pendant la création du compte
+            }
+            HttpContext.Session.SetInt32("Id", clientId);
+            HttpContext.Session.SetString("Email", user.Email);
+            HttpContext.Session.SetString("FirstName", user.FirstName);
+            HttpContext.Session.SetString("Type", "Client");
+
+
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()

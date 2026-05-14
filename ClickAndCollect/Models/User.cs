@@ -5,16 +5,16 @@ namespace ClickAndCollect.Models
     public abstract class User
     {
         private int id;
-        private string firstName;
-        private string surName;
-        private string email;
-        private string password;
-        private string confirmPassword;
+        private string? firstName;
+        private string? surName;
+        private string? email;
+        private string? password;
+        private string? confirmPassword;
 
         [Display(Name = "Confirm Password")]
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
-        public string ConfirmPassword
+        public string? ConfirmPassword
         {
             get { return confirmPassword; }
             set
@@ -28,7 +28,7 @@ namespace ClickAndCollect.Models
         [DataType(DataType.Password)]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{5,32}$",
             ErrorMessage = "Password must be between 5 and 32 characters and contain at least one uppercase letter, one lowercase letter and one number.")]
-        public string Password
+        public string? Password
         {
             get { return password; }
             set
@@ -44,7 +44,7 @@ namespace ClickAndCollect.Models
 
         [Display(Name = "Email Address")]
         [DataType(DataType.EmailAddress)]
-        public string Email
+        public string? Email
         {
             get { return email; }
             set
@@ -57,7 +57,7 @@ namespace ClickAndCollect.Models
         [Display(Name = "Surname")]
         [MinLength(2, ErrorMessage = "Surname must be at least 2 characters long.")]
         [MaxLength(25, ErrorMessage = "Surname cannot be longer than 25 characters.")]
-        public string SurName
+        public string? SurName
         {
             get { return surName; }
             set
@@ -74,7 +74,7 @@ namespace ClickAndCollect.Models
         [Display(Name = "First Name")]
         [MinLength(2, ErrorMessage = "First name must be at least 2 characters long.")]
         [MaxLength(25, ErrorMessage = "First name cannot be longer than 25 characters.")]
-        public string FirstName
+        public string? FirstName
         {
             get { return firstName; }
             set
@@ -97,6 +97,10 @@ namespace ClickAndCollect.Models
                     throw new ArgumentException("ID cannot be negative or zero.");
                 id = value;
             }
+        }
+
+        protected User()
+        {
         }
 
         protected User(int _id, string _firstName, string _surName, string _email, string _password)
