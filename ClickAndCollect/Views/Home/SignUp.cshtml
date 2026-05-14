@@ -1,0 +1,66 @@
+﻿@model Client
+@{
+    ViewData["Title"] = "Sign Up";
+}
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center">
+
+    <div class="rounded-4 shadow-lg p-5" style="width: 100%; max-width: 500px;">
+
+        <h3 class="fw-bold text-center mb-1">Create Account</h3>
+        <p class="text-muted text-center small mb-4">Join us to order your fresh goodies</p>
+
+        <form method="post">
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                    <input asp-for="FirstName" class="form-control rounded-pill border-dark"
+                        placeholder="John"/>
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+                <div class="col-6">
+                    <label asp-for="SurName" class="form-label fw-semibold"></label>
+                    <input asp-for="SurName" class="form-control rounded-pill border-dark"
+                        placeholder="Doe"/>
+                    <span asp-validation-for="SurName" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label fw-semibold"></label>
+                <input asp-for="Email" class="form-control rounded-pill border-dark"
+                    placeholder="john.doe@example.com"/>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Phone" class="form-label fw-semibold"></label>
+                <input asp-for="Phone" class="form-control rounded-pill border-dark"
+                    placeholder="+1234567890"/>
+                <span asp-validation-for="Phone" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label fw-semibold"></label>
+                <input asp-for="Address" class="form-control rounded-pill border-dark"
+                    placeholder="road example 123, 1234 Postal Code"/>
+                <span asp-validation-for="Address" class="text-danger small"></span>
+            </div>
+            <div class="mb-4">
+                <label asp-for="Password" class="form-label fw-semibold"></label>
+                <input asp-for="Password" class="form-control rounded-pill border-dark" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
+                <input asp-for="ConfirmPassword" class="form-control rounded-pill border-dark" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
+            <input type="submit" value="Sign Up" class="btn w-100 fw-bold rounded-pill mb-3"
+                style="background-color: #e8d44d;" />
+
+            <p class="text-center small text-muted">
+                Already have an account?
+                <a asp-action="SignUp" asp-controller="Home" class="fst-italic text-dark">Sign In</a>
+            </p>@* il faut mettre la redirection vers la page de login *@
+        </form>
+
+    </div>
+</div>

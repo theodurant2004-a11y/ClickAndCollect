@@ -8,7 +8,16 @@ builder.Services.AddControllersWithViews();
 // Add the DAL to the services collection
 string? connectionString = builder.Configuration.GetConnectionString("default");
 builder.Services.AddTransient<IArticleDAL>(aDal => new ArticleDAL(connectionString));
-builder.Services.AddTransient<ICategoryDAL>(cDal => new CategoryDAL(connectionString));
+builder.Services.AddTransient<ICategoryDAL>(catDal => new CategoryDAL(connectionString));
+builder.Services.AddTransient<IClientDAL>(clientDal => new ClientDAL(connectionString));
+
+// Add session services
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(15);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 
@@ -26,6 +35,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
