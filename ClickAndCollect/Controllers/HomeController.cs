@@ -147,7 +147,7 @@ namespace ClickAndCollect.Controllers
             return View();
         }
 
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
             if(HttpContext.Session.GetInt32("Id") == null)
             {
