@@ -54,11 +54,11 @@ namespace ClickAndCollect.Controllers
                 ModelState.AddModelError("Email", "This email is already in use.");
                 return View(user);
             }
-            // ajouter le user en DB et récuperer son id pour session
+            // ajouter le user en DB et rÃ©cuperer son id pour session
             int clientId = await user.AddClientAsync(clientDAL, user);
             if(clientId == -1)
             {
-                //erreur pendant la création du compte
+                //erreur pendant la crÃ©ation du compte
             }
             HttpContext.Session.SetInt32("Id", clientId);
             HttpContext.Session.SetString("Email", user.Email);
@@ -139,7 +139,7 @@ namespace ClickAndCollect.Controllers
         }
         public IActionResult IndexPreparator()
         {
-            // Sécurité
+            // SÃ©curitÃ©
             if (HttpContext.Session.GetString("Type") != "Preparator")
             {
                 return RedirectToAction("Connexion");
@@ -149,7 +149,47 @@ namespace ClickAndCollect.Controllers
 
         public IActionResult Profile()
         {
-            return View();
+            if(HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to view your profile."; 
+                return RedirectToAction("SignUp");
+            }
+            string email = HttpContext.Session.GetString("Email");
+            Client user = await Client.GetClientByEmail(clientDAL, email);
+            return View(user);
+        }
+
+        public async Task<IActionResult> EditProfile()
+        {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to edit your profile.";
+                return RedirectToAction("SignUp");
+            }
+            string email = HttpContext.Session.GetString("Email");
+            Client user = await Client.GetClientByEmail(clientDAL, email);
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(Client user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(user);
+            }
+            int? clientId = HttpContext.Session.GetInt32("Id");
+            //modification du user en DB
+            int rows = await clientDAL.UpdateClientInfo(clientId, user);
+
+            if(rows == 0)
+            {
+                //erreur pendant la modification du compte
+            }
+
+            HttpContext.Session.SetString("FirstName", user.FirstName);
+            return RedirectToAction("Profile");
         }
 
         public IActionResult Privacy()
