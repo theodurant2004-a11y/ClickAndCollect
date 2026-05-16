@@ -74,13 +74,13 @@ namespace ClickAndCollect.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Connexion(string email, string password)
+        public async Task<IActionResult> Connexion(Client loginInfo)
         {
-            var client = await clientDAL.GetClientByEmail(email);
+            var client = await clientDAL.GetClientByEmail(loginInfo.Email);
 
             if(client != null)
             {
-                if(password == client.Password)
+                if(loginInfo.Password == client.Password)
                 {
                     HttpContext.Session.SetInt32("Id", client.Id);
                     HttpContext.Session.SetString("Email", client.Email);
@@ -96,10 +96,10 @@ namespace ClickAndCollect.Controllers
                 }
             }
 
-            var employee = await employeeDAL.GetEmployeeByEmail(email);
+            var employee = await employeeDAL.GetEmployeeByEmail(loginInfo.Email);
             if(employee != null)
             {
-                if (password == employee.Password)
+                if (loginInfo.Password == employee.Password)
                 {
                     HttpContext.Session.SetInt32("Id", employee.Id);
                     HttpContext.Session.SetString("Email", employee.Email);
@@ -121,7 +121,7 @@ namespace ClickAndCollect.Controllers
                     return View();
                 }
             }
-            ViewBag.ErrorMessage = "This user doesn't exist";
+            ViewBag.ErrorMessage = "Invalid email or password";
             return View();
         }
         public IActionResult Logout()

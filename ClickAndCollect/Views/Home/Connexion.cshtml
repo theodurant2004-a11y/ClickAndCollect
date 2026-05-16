@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Client
+@{
     ViewData["Title"] = "Connexion";
 }
 
@@ -9,24 +10,26 @@
         <p class="text-muted text-center small mb-4">Content de vous revoir !</p>
 
 
-        @if (ViewBag.Error != null)
+        @if (ViewBag.ErrorMessage != null)
         {
             <div class="alert alert-danger small py-2 text-center">
-                @ViewBag.Error
+                @ViewBag.ErrorMessage
             </div>
         }
 
         <form method="post" asp-action="Connexion" asp-controller="Home">
 
             <div class="mb-3">
-                <label for="email" class="form-label fw-semibold">Email</label>
-                <input type="email" name="email" id="email" class="form-control rounded-pill border-dark"
+                <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                <input asp-for="Email" class="form-control rounded-pill border-dark"
                        placeholder="john.doe@example.com" required />
+                <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
 
             <div class="mb-4">
-                <label for="password" class="form-label fw-semibold">Password</label>
-                <input type="password" name="password" id="password" class="form-control rounded-pill border-dark" required />
+                <label asp-for="Password" class="form-label fw-semibold">Password</label>
+                <input asp-for="Password" class="form-control rounded-pill border-dark" required />
+                <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
             <button type="submit" class="btn w-100 fw-bold rounded-pill mb-3"
