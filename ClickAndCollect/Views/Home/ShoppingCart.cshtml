@@ -1,0 +1,85 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<h1 class="mb-4">Shopping Cart</h1>
+
+@* if the shopping cart is empty *@
+@if (Model == null || !Model.OrderLines.Any())
+{
+    <div class="text-center py-5">
+        <p class="fs-1">🛒</p>
+        <h4 class="fw-bold">Your shopping cart is empty</h4>
+        <p class="text-muted">Add some products to get started.</p>
+        <a asp-action="Index" asp-controller="Home" class="btn text-white rounded-pill px-4"
+           style="background-color: #00bcd4;">
+            Browse products
+        </a>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-8">
+            @foreach (OrderLine line in Model.OrderLines)
+            {
+                <div class="card border-0 shadow-sm rounded-4 mb-3 p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-0">@line.Article_.NameProduct</h5>
+                            <p class="text-muted small mb-1">@line.Article_.Category.Name</p>
+                            <p class="text-muted small mb-0">€@line.Article_.Price.ToString("0.00") / unit</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <form asp-action="RemoveOneFromCart" asp-controller="Home" method="post">
+                                    <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill">−</button>
+                                </form>
+                                <span class="fw-bold">@line.Quantity</span>
+                                <form asp-action="AddToCart" asp-controller="Home" method="post">
+                                    <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill">+</button>
+                                </form>
+                            </div>
+                            <span class="fw-bold text-success">€@line.GetPriceLine().ToString("0.00")</span>
+                            <form asp-action="RemoveFromCart" asp-controller="Home" method="post">
+                                <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">X</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-3">Order Summary</h5>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span>€@Model.GetTotalPrice().ToString("0.00")</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Service charge</span>
+                    <span>€5.95</span>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between fw-bold fs-5">
+                    <span>Total</span>
+                    <span>€@((Model.GetTotalPrice() + 5.95m).ToString("0.00"))</span>
+                </div>
+                <a asp-action="Checkout" asp-controller="Home"
+                   class="btn text-white w-100 rounded-pill mt-3 fw-bold"
+                   style="background-color: #00bcd4;">
+                    Proceed to checkout
+                </a>
+                <a asp-action="Index" asp-controller="Home"
+                   class="btn btn-outline-secondary w-100 rounded-pill mt-2">
+                    Continue shopping
+                </a>
+            </div>
+        </div>
+    </div>
+}

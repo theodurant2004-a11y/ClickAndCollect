@@ -34,6 +34,81 @@ namespace ClickAndCollect.Controllers
             return View(articles);
         }
 
+        public IActionResult AddToCart(int _articleId, int _quantity = 1, string? category = null)
+        {
+            Dictionary<int, int> cart = null;
+            string jsonCart = HttpContext.Session.GetString("Cart");
+            if(jsonCart != null)
+                cart = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(jsonCart);
+            else
+                cart = new Dictionary<int, int>();
+
+            if (cart.ContainsKey(_articleId))
+                cart[_articleId] += _quantity;
+            else
+                cart[_articleId] = _quantity;
+
+            HttpContext.Session.SetString("Cart", System.Text.Json.JsonSerializer.Serialize(cart));
+            return RedirectToAction("Index", new { category = category });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddToCart(int articleId, int quantity = 1)
+        {
+            Dictionary<int, int> cart = null;
+            string jsonCart = HttpContext.Session.GetString("Cart");
+            if (jsonCart != null)
+                cart = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(jsonCart);
+            else
+                cart = new Dictionary<int, int>();
+
+            if (cart.ContainsKey(articleId))
+                cart[articleId] += quantity;
+            else
+                cart[articleId] = quantity;
+
+            HttpContext.Session.SetString("Cart", System.Text.Json.JsonSerializer.Serialize(cart));
+            return RedirectToAction("ShoppingCart");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RemoveOneFromCart(int articleId)
+        {
+            string jsonCart = HttpContext.Session.GetString("Cart");
+            if (jsonCart == null)
+                return RedirectToAction("ShoppingCart");
+
+            Dictionary<int, int> cart = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(jsonCart);
+
+            if (cart.ContainsKey(articleId))
+            {
+                cart[articleId]--;
+                if (cart[articleId] <= 0)
+                    cart.Remove(articleId);
+            }
+
+            HttpContext.Session.SetString("Cart", System.Text.Json.JsonSerializer.Serialize(cart));
+            return RedirectToAction("ShoppingCart");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RemoveFromCart(int articleId)
+        {
+            string jsonCart = HttpContext.Session.GetString("Cart");
+            if (jsonCart == null)
+                return RedirectToAction("ShoppingCart");
+
+            Dictionary<int, int> cart = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(jsonCart);
+
+            cart.Remove(articleId);
+
+            HttpContext.Session.SetString("Cart", System.Text.Json.JsonSerializer.Serialize(cart));
+            return RedirectToAction("ShoppingCart");
+        }
+
         //Sign Up
         public IActionResult SignUp()
         {
@@ -190,6 +265,33 @@ namespace ClickAndCollect.Controllers
 
             HttpContext.Session.SetString("FirstName", user.FirstName);
             return RedirectToAction("Profile");
+        }
+
+        public async Task<IActionResult> ShoppingCart()
+        {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to view your shopping cart.";
+                return RedirectToAction("SignUp");
+            }
+
+            string json = HttpContext.Session.GetString("Cart");
+            if (json == null)
+                return View((Order)null);
+
+            Dictionary<int, int> cartDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
+            if (cartDict.Count == 0)
+                return View((Order)null);
+
+            List<Article> articles = await articleDAL.GetArticlesAsync(cartDict.Keys.ToList());
+
+            Order cart = new Order();
+            foreach (Article article in articles)
+            {
+                cart.AddArticle(article, cartDict[article.IDArticle]);
+            }
+
+            return View(cart);
         }
 
         public IActionResult Privacy()
