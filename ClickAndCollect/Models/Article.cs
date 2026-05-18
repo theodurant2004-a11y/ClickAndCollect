@@ -77,9 +77,9 @@ namespace ClickAndCollect.Models
             }
         }
 
-        public static async Task<List<Article>> GetAllArticlesAsync(IArticleDAL _dAL)
+        public static async Task<List<Article>> GetAllArticlesAsync(IArticleDAL _dAL, List<int>? ids = null)
         {
-            return await _dAL.GetAllArticlesAsync();
+            return await _dAL.GetArticlesAsync(ids);
         }
     }
 }

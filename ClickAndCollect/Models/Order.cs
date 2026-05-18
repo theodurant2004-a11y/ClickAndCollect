@@ -53,7 +53,7 @@
 				existingLine.Quantity += _quantity;
             //else create a new order line with article and quantity
             else
-                orderLines.Add(new OrderLine { Article_ = _article, Quantity = _quantity });
+                orderLines.Add(new OrderLine(_quantity, _article, this));
         }
 
 		public void RemoveArticle(Article _article, int _quantity)
@@ -84,7 +84,7 @@
         {
             foreach (OrderLine line in orderLines)
             {
-                //dispose
+                orderLines.Clear();
             }
         }
     }

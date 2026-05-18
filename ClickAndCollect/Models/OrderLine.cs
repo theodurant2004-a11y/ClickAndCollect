@@ -33,8 +33,8 @@
 			get { return quantity; }
 			set 
 			{
-				if(value <= 0)
-					ParentOrder.RemoveOrderLine(this);
+                if (value <= 0 && parentOrder != null)
+                    ParentOrder.RemoveOrderLine(this);
                 quantity = value;
 			}
 		}
