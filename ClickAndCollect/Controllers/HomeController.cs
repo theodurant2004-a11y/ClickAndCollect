@@ -26,22 +26,30 @@ namespace ClickAndCollect.Controllers
 
         public async Task<IActionResult> Index(string? category)
         {
-            List<Article> articles = await Article.GetAllArticlesAsync(articleDAL);
-            List<Category> categories = await Category.GetCategoriesAsync(categoryDAL);
-
-            if (!string.IsNullOrEmpty(category))
+            try
             {
-                List<Article> filtered = new List<Article>();
-                foreach (Article article in articles)
-                {
-                    if (article.Category.Name == category)
-                        filtered.Add(article);
-                }
-                articles = filtered;
-            }
+                List<Article> articles = await Article.GetAllArticlesAsync(articleDAL);
+                List<Category> categories = await Category.GetCategoriesAsync(categoryDAL);
 
-            ViewBag.Categories = categories;
-            return View(articles);
+                if (!string.IsNullOrEmpty(category))
+                {
+                    List<Article> filtered = new List<Article>();
+                    foreach (Article article in articles)
+                    {
+                        if (article.Category.Name == category)
+                            filtered.Add(article);
+                    }
+                    articles = filtered;
+                }
+
+                ViewBag.Categories = categories;
+                return View(articles);
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while loading the catalog.";
+                return RedirectToAction("Error");
+            }
         }
 
         public IActionResult AddToCart(int _articleId, int _quantity = 1, string? category = null)
@@ -150,29 +158,37 @@ namespace ClickAndCollect.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignUp(Client user)
         {
-            if(!ModelState.IsValid)
+            try
             {
-                return View(user);
-            }
-            //verify if user is in DB
-            if(await Client.GetClientByEmail(clientDAL, user.Email) != null)
-            {
-                ModelState.AddModelError("Email", "This email is already in use.");
-                return View(user);
-            }
-            // add user in DB and add to session
-            int clientId = await user.AddClientAsync(clientDAL, user);
-            if(clientId == -1)
-            {
-                ModelState.AddModelError("", "An error occurred while creating your account.");
-                return View(user);
-            }
-            HttpContext.Session.SetInt32("Id", clientId);
-            HttpContext.Session.SetString("Email", user.Email);
-            HttpContext.Session.SetString("FirstName", user.FirstName);
-            HttpContext.Session.SetString("Type", "Client");
+                if (!ModelState.IsValid)
+                {
+                    return View(user);
+                }
+                //verify if user is in DB
+                if (await Client.GetClientByEmail(clientDAL, user.Email) != null)
+                {
+                    ModelState.AddModelError("Email", "This email is already in use.");
+                    return View(user);
+                }
+                // add user in DB and add to session
+                int clientId = await user.AddClientAsync(clientDAL, user);
+                if (clientId == -1)
+                {
+                    ModelState.AddModelError("", "An error occurred while creating your account.");
+                    return View(user);
+                }
+                HttpContext.Session.SetInt32("Id", clientId);
+                HttpContext.Session.SetString("Email", user.Email);
+                HttpContext.Session.SetString("FirstName", user.FirstName);
+                HttpContext.Session.SetString("Type", "Client");
 
-            return RedirectToAction("Index");
+                return RedirectToAction("Index");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while Signing up.";
+                return RedirectToAction("Error");
+            }
         }
 
         //Connexion
@@ -256,163 +272,211 @@ namespace ClickAndCollect.Controllers
 
         public async Task<IActionResult> Profile()
         {
-            if(HttpContext.Session.GetInt32("Id") == null)
+            try
             {
-                TempData["Error"] = "You must be logged in to view your profile."; 
-                return RedirectToAction("SignUp");
+                if (HttpContext.Session.GetInt32("Id") == null)
+                {
+                    TempData["Error"] = "You must be logged in to view your profile.";
+                    return RedirectToAction("SignUp");
+                }
+                string email = HttpContext.Session.GetString("Email");
+                Client user = await Client.GetClientByEmail(clientDAL, email);
+                return View(user);
             }
-            string email = HttpContext.Session.GetString("Email");
-            Client user = await Client.GetClientByEmail(clientDAL, email);
-            return View(user);
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while Getting the client info.";
+                return RedirectToAction("Error");
+            }
         }
 
         public async Task<IActionResult> EditProfile()
         {
-            if (HttpContext.Session.GetInt32("Id") == null)
+            try
             {
-                TempData["Error"] = "You must be logged in to edit your profile.";
-                return RedirectToAction("SignUp");
+                if (HttpContext.Session.GetInt32("Id") == null)
+                {
+                    TempData["Error"] = "You must be logged in to edit your profile.";
+                    return RedirectToAction("SignUp");
+                }
+                string email = HttpContext.Session.GetString("Email");
+                Client user = await Client.GetClientByEmail(clientDAL, email);
+                return View(user);
             }
-            string email = HttpContext.Session.GetString("Email");
-            Client user = await Client.GetClientByEmail(clientDAL, email);
-            return View(user);
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while Getting the client info.";
+                return RedirectToAction("Error");
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfile(Client user)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return View(user);
-            }
-            //modification of user in DB
-            int rows = await clientDAL.UpdateClientInfo(user);
+                if (!ModelState.IsValid)
+                {
+                    return View(user);
+                }
+                //modification of user in DB
+                int rows = await clientDAL.UpdateClientInfo(user);
 
-            if(rows == 0)
+                if (rows == 0)
+                {
+                    TempData["Error"] = "An error occurred while saving the changes";
+                    return RedirectToAction("Error");
+                }
+
+                HttpContext.Session.SetString("FirstName", user.FirstName);
+                return RedirectToAction("Profile");
+            }
+            catch (Exception)
             {
-                TempData["Error"] = "An error occurred while saving the changes";
+                TempData["Error"] = "An error occurred while Updating the client info.";
                 return RedirectToAction("Error");
             }
-
-            HttpContext.Session.SetString("FirstName", user.FirstName);
-            return RedirectToAction("Profile");
         }
 
         public async Task<IActionResult> ShoppingCart()
         {
-            if (HttpContext.Session.GetInt32("Id") == null)
+            try
             {
-                TempData["Error"] = "You must be logged in to view your shopping cart.";
-                return RedirectToAction("SignUp");
+                if (HttpContext.Session.GetInt32("Id") == null)
+                {
+                    TempData["Error"] = "You must be logged in to view your shopping cart.";
+                    return RedirectToAction("SignUp");
+                }
+
+                string json = HttpContext.Session.GetString("Cart");
+                if (json == null)
+                    return View((Order)null);
+
+                Dictionary<int, int> cartDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
+                if (cartDict.Count == 0)
+                    return View((Order)null);
+
+                List<Article> articles = await articleDAL.GetArticlesAsync(cartDict.Keys.ToList());
+
+                Order cart = new Order();
+                foreach (Article article in articles)
+                {
+                    cart.AddArticle(article, cartDict[article.IDArticle]);
+                }
+
+                return View(cart);
             }
-
-            string json = HttpContext.Session.GetString("Cart");
-            if (json == null)
-                return View((Order)null);
-
-            Dictionary<int, int> cartDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
-            if (cartDict.Count == 0)
-                return View((Order)null);
-
-            List<Article> articles = await articleDAL.GetArticlesAsync(cartDict.Keys.ToList());
-
-            Order cart = new Order();
-            foreach (Article article in articles)
+            catch (Exception)
             {
-                cart.AddArticle(article, cartDict[article.IDArticle]);
+                TempData["Error"] = "An error occurred while Getting the Articles.";
+                return RedirectToAction("Error");
             }
-
-            return View(cart);
         }
 
         public async Task<IActionResult> Checkout(int? storeId = null, string? selectedDate = null, string? timeSlotInfo = null)
         {
-            if (HttpContext.Session.GetInt32("Id") == null)
+            try
             {
-                TempData["Error"] = "You must be logged in to checkout.";
-                return RedirectToAction("SignUp");
-            }
-
-            string json = HttpContext.Session.GetString("Cart");
-            if (json == null)
-                return RedirectToAction("ShoppingCart");
-
-            Dictionary<int, int> cartDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
-            List<Article> articles = await articleDAL.GetArticlesAsync(cartDict.Keys.ToList());
-            Order cart = new Order();
-            foreach (Article article in articles)
-                cart.AddArticle(article, cartDict[article.IDArticle]);
-
-            List<Store> stores = await Store.GetStoresAsync(storeDAL);
-            ViewBag.Stores = stores;
-            ViewBag.SelectedStoreId = storeId;
-
-            if (storeId != null)
-            {
-                Store selectedStore = new Store { Id = storeId.Value };
-                List<TimeSlot> timeSlots = await Store.GetAvailableTimeSlotsAsync(storeDAL, selectedStore);
-                ViewBag.TimeSlots = timeSlots;
-
-                List<DateTime> availableDates = new List<DateTime>();
-                foreach (TimeSlot slot in timeSlots)
+                if (HttpContext.Session.GetInt32("Id") == null)
                 {
-                    if (!availableDates.Contains(slot.Date.Date))
-                        availableDates.Add(slot.Date.Date);
+                    TempData["Error"] = "You must be logged in to checkout.";
+                    return RedirectToAction("SignUp");
                 }
-                ViewBag.AvailableDates = availableDates;
-            }
 
-            ViewBag.SelectedTimeSlotInfo = timeSlotInfo;
-            ViewBag.SelectedDate = selectedDate;
-            return View(cart);
+                string json = HttpContext.Session.GetString("Cart");
+                if (json == null)
+                    return RedirectToAction("ShoppingCart");
+
+                Dictionary<int, int> cartDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
+                List<Article> articles = await articleDAL.GetArticlesAsync(cartDict.Keys.ToList());
+                Order cart = new Order();
+                foreach (Article article in articles)
+                    cart.AddArticle(article, cartDict[article.IDArticle]);
+
+                List<Store> stores = await Store.GetStoresAsync(storeDAL);
+                ViewBag.Stores = stores;
+                ViewBag.SelectedStoreId = storeId;
+
+                if (storeId != null)
+                {
+                    Store selectedStore = new Store { Id = storeId.Value };
+                    List<TimeSlot> timeSlots = await Store.GetAvailableTimeSlotsAsync(storeDAL, selectedStore);
+                    ViewBag.TimeSlots = timeSlots;
+
+                    List<DateTime> availableDates = new List<DateTime>();
+                    foreach (TimeSlot slot in timeSlots)
+                    {
+                        if (!availableDates.Contains(slot.Date.Date))
+                            availableDates.Add(slot.Date.Date);
+                    }
+                    ViewBag.AvailableDates = availableDates;
+                }
+
+                ViewBag.SelectedTimeSlotInfo = timeSlotInfo;
+                ViewBag.SelectedDate = selectedDate;
+                return View(cart);
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while Getting the Stores and/or time slots.";
+                return RedirectToAction("Error");
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder(int storeId, string timeSlotInfo, string selectedDate)
         {
-            if (HttpContext.Session.GetInt32("Id") == null)
+            try
             {
-                TempData["Error"] = "You must be logged in to place an order.";
-                return RedirectToAction("SignUp");
-            }
+                if (HttpContext.Session.GetInt32("Id") == null)
+                {
+                    TempData["Error"] = "You must be logged in to place an order.";
+                    return RedirectToAction("SignUp");
+                }
 
-            string json = HttpContext.Session.GetString("Cart");
-            if (json == null)
+                string json = HttpContext.Session.GetString("Cart");
+                if (json == null)
+                {
+                    TempData["Error"] = "Your cart is empty.";
+                    return RedirectToAction("ShoppingCart");
+                }
+
+                Dictionary<int, int> cart = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
+                if (cart.Count == 0)
+                {
+                    TempData["Error"] = "Your cart is empty.";
+                    return RedirectToAction("ShoppingCart");
+                }
+
+                string[] parts = timeSlotInfo.Split('|');
+                int timeSlotId = int.Parse(parts[0]);
+                DateTime date = DateTime.Parse(selectedDate);
+                DateTime start = DateTime.Parse(selectedDate + " " + parts[1]);
+                DateTime end = DateTime.Parse(selectedDate + " " + parts[2]);
+
+                Client client = new Client { Id = HttpContext.Session.GetInt32("Id").Value };
+                Store store = new Store { Id = storeId };
+                TimeSlot timeSlot = new TimeSlot { Id = timeSlotId, Date = date, StartingHour = start, EndingHour = end };
+
+                int orderId = await Order.PlaceOrderAsync(orderDAL, client, store, timeSlot, cart);
+
+                if (orderId <= 0)
+                {
+                    TempData["Error"] = "An error occurred while placing your order.";
+                    return RedirectToAction("Checkout");
+                }
+
+                HttpContext.Session.Remove("Cart");
+                TempData["Success"] = "Your order has been placed successfully!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception)
             {
-                TempData["Error"] = "Your cart is empty.";
-                return RedirectToAction("ShoppingCart");
+                TempData["Error"] = "An error occurred while Inserting the order.";
+                return RedirectToAction("Error");
             }
-
-            Dictionary<int, int> cart = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
-            if (cart.Count == 0)
-            {
-                TempData["Error"] = "Your cart is empty.";
-                return RedirectToAction("ShoppingCart");
-            }
-
-            string[] parts = timeSlotInfo.Split('|');
-            int timeSlotId = int.Parse(parts[0]);
-            DateTime date = DateTime.Parse(selectedDate);
-            DateTime start = DateTime.Parse(selectedDate + " " + parts[1]);
-            DateTime end = DateTime.Parse(selectedDate + " " + parts[2]);
-
-            Client client = new Client { Id = HttpContext.Session.GetInt32("Id").Value };
-            Store store = new Store { Id = storeId };
-            TimeSlot timeSlot = new TimeSlot { Id = timeSlotId, Date = date, StartingHour = start, EndingHour = end };
-
-            int orderId = await Order.PlaceOrderAsync(orderDAL, client, store, timeSlot, cart);
-
-            if (orderId <= 0)
-            {
-                TempData["Error"] = "An error occurred while placing your order.";
-                return RedirectToAction("Checkout");
-            }
-
-            HttpContext.Session.Remove("Cart");
-            TempData["Success"] = "Your order has been placed successfully!";
-            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()

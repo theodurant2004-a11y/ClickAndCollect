@@ -6,12 +6,10 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-
             <div class="card border-0 shadow-sm rounded-4 p-4">
 
                 <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3"
-                         style="width: 70px; height: 70px; background-color: #1a4a52;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3 profile-avatar">
                         @Model.FirstName?[0]@Model.SurName?[0]
                     </div>
                     <div>
@@ -23,7 +21,6 @@
                 <hr />
 
                 <form method="post">
-
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label asp-for="FirstName" class="text-muted small mb-1"></label>
@@ -37,8 +34,7 @@
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Email" class="text-muted small mb-1"></label>
-                            <input asp-for="Email" class="form-control rounded-pill border-secondary"
-                                   disabled />
+                            <input asp-for="Email" class="form-control rounded-pill border-secondary" disabled />
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Phone" class="text-muted small mb-1"></label>
@@ -70,15 +66,13 @@
                     <hr />
 
                     <div class="d-flex gap-2 mt-2">
-                        <input type="submit" class="btn text-white rounded-pill px-4"
-                               style="background-color: #00bcd4;" />
-
+                        <input type="submit" value="Save Changes"
+                               class="btn text-white rounded-pill px-4 btn-teal" />
                         <a asp-action="Profile" asp-controller="Home"
                            class="btn btn-outline-secondary rounded-pill px-4">
                             Cancel
                         </a>
                     </div>
-
                 </form>
 
             </div>

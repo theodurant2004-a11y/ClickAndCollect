@@ -1,22 +1,99 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
+/* --- Form controls focus --- */
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
+/* --- Layout --- */
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
+
+/* --- Catalog --- */
+.filter-panel {
+    width: 25%;
+    min-width: 200px;
+    background-color: #eef4f7;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+}
+
+.btn-filter {
+    background-color: #00bcd4;
+    color: white;
+}
+
+    .btn-filter:hover {
+        background-color: #00a0b5;
+        color: white;
+    }
+
+.toast-success {
+    background-color: green;
+}
+
+/* --- Article card --- */
+.card-img-article {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    object-position: center;
+    background-color: #f8f9fa;
+}
+
+.btn-add-to-cart {
+    background-color: #00bcd4;
+    border-radius: 20px;
+    color: white;
+}
+
+    .btn-add-to-cart:hover {
+        background-color: #00a0b5;
+        color: white;
+    }
+
+/* --- Forms --- */
+.form-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* --- Profile --- */
+.profile-avatar {
+    width: 70px;
+    height: 70px;
+    background-color: #1a4a52;
+}
+
+/* --- Shared buttons --- */
+.btn-primary-action {
+    background-color: #e8d44d;
+}
+
+    .btn-primary-action:hover {
+        background-color: #d4c040;
+    }
+
+.btn-teal {
+    background-color: #00bcd4;
+}
+
+    .btn-teal:hover {
+        background-color: #00a0b5;
+        color: white;
+    }
