@@ -4,9 +4,14 @@
     {
 		private int boxUsed;
 		private int boxReturned;
-		// status
-		// service charge
+        // status
+        private static decimal serviceCharge = 5.95m;
 		List<OrderLine> orderLines;
+
+        public static decimal ServiceCharge
+        {
+            get { return serviceCharge; }
+        }
 
         public int BoxUsed
 		{
@@ -40,33 +45,35 @@
             orderLines = new List<OrderLine>();
         }
 
-		public void AddArticle(Article _article, int _quantity)//possibilité de modifier avec un contains ou quoi
+		public void AddArticle(Article _article, int _quantity)
 		{
             //if article already exists in the order, update the quantity
             OrderLine existingLine = null;
 			for(int i = 0; i < orderLines.Count && existingLine == null; i++)
             {
-                if (orderLines[i].Article_.IDArticle == _article.IDArticle)
+                if (orderLines[i].Article_ == _article)
                     existingLine = orderLines[i];
             }
 			if(existingLine != null)
 				existingLine.Quantity += _quantity;
-            //else create a new order line with article and quantity
             else
+                //create a new order line with article and quantity
                 orderLines.Add(new OrderLine(_quantity, _article, this));
         }
 
 		public void RemoveArticle(Article _article, int _quantity)
 		{
+            
             for (int i = 0; i < orderLines.Count; i++)
             {
-                if (orderLines[i].Article_.IDArticle == _article.IDArticle)
+                if (orderLines[i].Article_ == _article)
                     orderLines[i].Quantity -= _quantity;
             }
         }
 
         public void RemoveOrderLine(OrderLine _line)
         {
+            //TODO : Dispose of the orderline
             orderLines.Remove(_line);
         }
 

@@ -19,8 +19,13 @@ namespace ClickAndCollect.DAL
         {
             List<Article> articles = new List<Article>();
 
-            string query = "SELECT a.articleID, a.name, a.price, a.description, c.name AS categoryName " +
-                           "FROM Article a JOIN Category c ON a.categoryID = c.categoryID";
+            string query = @"SELECT a.articleID, 
+                                a.name, 
+                                a.price, 
+                                a.description, 
+                                c.name AS categoryName
+                           FROM Article a 
+                           JOIN Category c ON a.categoryID = c.categoryID";
 
             if (ids != null && ids.Count > 0)
                 query += $" WHERE a.articleID IN ({string.Join(",", ids)})";

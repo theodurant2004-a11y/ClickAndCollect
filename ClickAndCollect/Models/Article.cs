@@ -81,5 +81,20 @@ namespace ClickAndCollect.Models
         {
             return await _dAL.GetArticlesAsync(ids);
         }
+
+        public override string ToString()
+        {
+            return $"{IDArticle} : {NameProduct} {Price}, {Category}. Description : {Description}";
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return this.ToString() == obj.ToString();
+        }
     }
 }

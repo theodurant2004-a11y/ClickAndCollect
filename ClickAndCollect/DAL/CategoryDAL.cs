@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace ClickAndCollect.DAL
 {
@@ -27,7 +28,7 @@ namespace ClickAndCollect.DAL
                 {
                     while (await reader.ReadAsync())
                     {
-                        string nameCategory = reader.GetString(0);
+                        string nameCategory = reader.GetString("name");
                         categories.Add(nameCategory);
                     }
                 }

@@ -54,5 +54,20 @@
 		{
 			return Quantity * Article_.Price;
         }
+
+   //     public override string ToString()
+   //     {
+   //         return $"Article : {Article_}, Quantity : {Quantity}";
+   //     }
+
+   //     public override bool Equals(object? obj)
+   //     {
+			//return this.ToString() == obj.ToString();
+   //     }
+
+   //     public override int GetHashCode()
+   //     {
+   //         return this.ToString().GetHashCode();
+   //     }
 	}
 }

@@ -36,6 +36,12 @@ namespace ClickAndCollect.Controllers
 
         public IActionResult AddToCart(int _articleId, int _quantity = 1, string? category = null)
         {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to add article to your shopping cart.";
+                return RedirectToAction("SignUp");
+            }
+
             Dictionary<int, int> cart = null;
             string jsonCart = HttpContext.Session.GetString("Cart");
             if(jsonCart != null)
