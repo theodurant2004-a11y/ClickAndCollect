@@ -35,7 +35,8 @@
 			{
                 if (value <= 0 && parentOrder != null)
                     ParentOrder.RemoveOrderLine(this);
-                quantity = value;
+				else
+					quantity = value;
 			}
 		}
 
@@ -55,19 +56,9 @@
 			return Quantity * Article_.Price;
         }
 
-   //     public override string ToString()
-   //     {
-   //         return $"Article : {Article_}, Quantity : {Quantity}";
-   //     }
-
-   //     public override bool Equals(object? obj)
-   //     {
-			//return this.ToString() == obj.ToString();
-   //     }
-
-   //     public override int GetHashCode()
-   //     {
-   //         return this.ToString().GetHashCode();
-   //     }
+		public override string ToString()
+		{
+			return $"Article : {Article_}, Quantity : {Quantity}";
+		}
 	}
 }

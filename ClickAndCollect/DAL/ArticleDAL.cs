@@ -23,6 +23,7 @@ namespace ClickAndCollect.DAL
                                 a.name, 
                                 a.price, 
                                 a.description, 
+                                COALESCE(a.imagePath, 'none') AS imagePath,
                                 c.name AS categoryName
                            FROM Article a 
                            JOIN Category c ON a.categoryID = c.categoryID";
@@ -42,8 +43,9 @@ namespace ClickAndCollect.DAL
                         string name = reader.GetString("name");
                         decimal price = reader.GetDecimal("price");
                         string description = reader.GetString("description");
+                        string imagePath = reader.GetString("imagePath");
                         string categoryName = reader.GetString("categoryName");
-                        articles.Add(new Article(id, name, price, description, new Category(categoryName)));
+                        articles.Add(new Article(id, name, price, description, new Category(categoryName), imagePath));
                     }
                 }
             }

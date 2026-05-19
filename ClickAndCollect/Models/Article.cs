@@ -9,14 +9,25 @@ namespace ClickAndCollect.Models
         private decimal price;
         private string description;
         private Category category;
+        private string imagePath;
 
-        public Article(int _idArticle, string _nameProduct, decimal _price, string _description, Category _category)
+        public Article(int _idArticle, string _nameProduct, decimal _price, string _description, Category _category, string _imagePath)
         {
             IDArticle = _idArticle;
             NameProduct = _nameProduct;
             Price = _price;
             Description = _description;
+            ImagePath = _imagePath;
             Category = _category;
+        }
+
+        public string ImagePath
+        {
+            get { return imagePath; }
+            set 
+            {
+                imagePath = value; 
+            }
         }
 
         public Category Category
@@ -84,7 +95,7 @@ namespace ClickAndCollect.Models
 
         public override string ToString()
         {
-            return $"{IDArticle} : {NameProduct} {Price}, {Category}. Description : {Description}";
+            return $"{IDArticle} : {NameProduct} {Price:C}, {Category}.";
         }
 
         public override int GetHashCode()
@@ -94,7 +105,9 @@ namespace ClickAndCollect.Models
 
         public override bool Equals(object? obj)
         {
-            return this.ToString() == obj.ToString();
+            if (obj != null)
+                return this.ToString() == obj.ToString();
+            return false;
         }
     }
 }

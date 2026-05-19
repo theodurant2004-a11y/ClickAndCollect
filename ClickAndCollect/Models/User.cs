@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
 namespace ClickAndCollect.Models
 {
     public abstract class User
@@ -99,9 +98,7 @@ namespace ClickAndCollect.Models
             }
         }
 
-        protected User()
-        {
-        }
+        protected User() { }
 
         protected User(int _id, string _firstName, string _surName, string _email, string _password)
         {
@@ -110,6 +107,11 @@ namespace ClickAndCollect.Models
             SurName = _surName;
             Email = _email;
             Password = _password;
+        }
+
+        public override string ToString()
+        {
+            return $"{FirstName} {SurName} ({Email})";
         }
     }
 }

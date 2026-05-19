@@ -11,6 +11,8 @@ builder.Services.AddTransient<IArticleDAL>(aDal => new ArticleDAL(connectionStri
 builder.Services.AddTransient<ICategoryDAL>(catDal => new CategoryDAL(connectionString));
 builder.Services.AddTransient<IClientDAL>(sp => new ClientDAL(connectionString));
 builder.Services.AddTransient<IEmployeeDAL>(empDal => new EmployeeDAL(connectionString));
+builder.Services.AddTransient<IStoreDAL>(strDAL => new StoreDAL(connectionString));
+builder.Services.AddTransient<IOrderDAL>(oDAL => new OrderDAL(connectionString));
 
 // Add session services
 builder.Services.AddSession(options =>

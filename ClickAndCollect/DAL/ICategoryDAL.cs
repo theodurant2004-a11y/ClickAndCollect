@@ -1,7 +1,9 @@
-﻿namespace ClickAndCollect.DAL
+﻿using ClickAndCollect.Models;
+
+namespace ClickAndCollect.DAL
 {
     public interface ICategoryDAL
     {
-        Task<List<string>> GetCategoriesAsync();
+        Task<List<Category>> GetCategoriesAsync();
     }
 }

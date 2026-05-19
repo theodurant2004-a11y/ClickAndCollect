@@ -11,23 +11,33 @@ namespace ClickAndCollect.Controllers
         private readonly ICategoryDAL categoryDAL;
         private readonly IClientDAL clientDAL;
         private readonly IEmployeeDAL employeeDAL;
+        private readonly IStoreDAL storeDAL;
+        private readonly IOrderDAL orderDAL;
 
-        public HomeController(IArticleDAL _articleDAL, ICategoryDAL _categoryDAL, IClientDAL _clientDAL, IEmployeeDAL _employeeDAL)
+        public HomeController(IArticleDAL _articleDAL, ICategoryDAL _categoryDAL, IClientDAL _clientDAL, IEmployeeDAL _employeeDAL, IStoreDAL _storeDAL, IOrderDAL _orderDAL)
         {
             articleDAL = _articleDAL;
             categoryDAL = _categoryDAL;
             clientDAL = _clientDAL;
             employeeDAL = _employeeDAL;
+            storeDAL = _storeDAL;
+            orderDAL = _orderDAL;
         }
 
         public async Task<IActionResult> Index(string? category)
         {
             List<Article> articles = await Article.GetAllArticlesAsync(articleDAL);
-            List<string> categories = await Category.GetCategoriesAsync(categoryDAL);
+            List<Category> categories = await Category.GetCategoriesAsync(categoryDAL);
 
             if (!string.IsNullOrEmpty(category))
             {
-                articles = articles.Where(a => a.Category.ToString() == category).ToList();
+                List<Article> filtered = new List<Article>();
+                foreach (Article article in articles)
+                {
+                    if (article.Category.Name == category)
+                        filtered.Add(article);
+                }
+                articles = filtered;
             }
 
             ViewBag.Categories = categories;
@@ -62,6 +72,11 @@ namespace ClickAndCollect.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddToCart(int articleId, int quantity = 1)
         {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to add article to your shopping cart.";
+                return RedirectToAction("SignUp");
+            }
             Dictionary<int, int> cart = null;
             string jsonCart = HttpContext.Session.GetString("Cart");
             if (jsonCart != null)
@@ -82,6 +97,11 @@ namespace ClickAndCollect.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RemoveOneFromCart(int articleId)
         {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to remove article from your shopping cart.";
+                return RedirectToAction("SignUp");
+            }
             string jsonCart = HttpContext.Session.GetString("Cart");
             if (jsonCart == null)
                 return RedirectToAction("ShoppingCart");
@@ -103,6 +123,11 @@ namespace ClickAndCollect.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RemoveFromCart(int articleId)
         {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to remove article from your shopping cart.";
+                return RedirectToAction("SignUp");
+            }
             string jsonCart = HttpContext.Session.GetString("Cart");
             if (jsonCart == null)
                 return RedirectToAction("ShoppingCart");
@@ -129,17 +154,18 @@ namespace ClickAndCollect.Controllers
             {
                 return View(user);
             }
-            //verfier si le mail existe en DB
+            //verify if user is in DB
             if(await Client.GetClientByEmail(clientDAL, user.Email) != null)
             {
                 ModelState.AddModelError("Email", "This email is already in use.");
                 return View(user);
             }
-            // ajouter le user en DB et récuperer son id pour session
+            // add user in DB and add to session
             int clientId = await user.AddClientAsync(clientDAL, user);
             if(clientId == -1)
             {
-                //erreur pendant la création du compte
+                ModelState.AddModelError("", "An error occurred while creating your account.");
+                return View(user);
             }
             HttpContext.Session.SetInt32("Id", clientId);
             HttpContext.Session.SetString("Email", user.Email);
@@ -260,13 +286,13 @@ namespace ClickAndCollect.Controllers
             {
                 return View(user);
             }
-            int? clientId = HttpContext.Session.GetInt32("Id");
-            //modification du user en DB
-            int rows = await clientDAL.UpdateClientInfo(clientId, user);
+            //modification of user in DB
+            int rows = await clientDAL.UpdateClientInfo(user);
 
             if(rows == 0)
             {
-                //erreur pendant la modification du compte
+                TempData["Error"] = "An error occurred while saving the changes";
+                return RedirectToAction("Error");
             }
 
             HttpContext.Session.SetString("FirstName", user.FirstName);
@@ -298,6 +324,95 @@ namespace ClickAndCollect.Controllers
             }
 
             return View(cart);
+        }
+
+        public async Task<IActionResult> Checkout(int? storeId = null, string? selectedDate = null, string? timeSlotInfo = null)
+        {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to checkout.";
+                return RedirectToAction("SignUp");
+            }
+
+            string json = HttpContext.Session.GetString("Cart");
+            if (json == null)
+                return RedirectToAction("ShoppingCart");
+
+            Dictionary<int, int> cartDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
+            List<Article> articles = await articleDAL.GetArticlesAsync(cartDict.Keys.ToList());
+            Order cart = new Order();
+            foreach (Article article in articles)
+                cart.AddArticle(article, cartDict[article.IDArticle]);
+
+            List<Store> stores = await Store.GetStoresAsync(storeDAL);
+            ViewBag.Stores = stores;
+            ViewBag.SelectedStoreId = storeId;
+
+            if (storeId != null)
+            {
+                Store selectedStore = new Store { Id = storeId.Value };
+                List<TimeSlot> timeSlots = await Store.GetAvailableTimeSlotsAsync(storeDAL, selectedStore);
+                ViewBag.TimeSlots = timeSlots;
+
+                List<DateTime> availableDates = new List<DateTime>();
+                foreach (TimeSlot slot in timeSlots)
+                {
+                    if (!availableDates.Contains(slot.Date.Date))
+                        availableDates.Add(slot.Date.Date);
+                }
+                ViewBag.AvailableDates = availableDates;
+            }
+
+            ViewBag.SelectedTimeSlotInfo = timeSlotInfo;
+            ViewBag.SelectedDate = selectedDate;
+            return View(cart);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PlaceOrder(int storeId, string timeSlotInfo, string selectedDate)
+        {
+            if (HttpContext.Session.GetInt32("Id") == null)
+            {
+                TempData["Error"] = "You must be logged in to place an order.";
+                return RedirectToAction("SignUp");
+            }
+
+            string json = HttpContext.Session.GetString("Cart");
+            if (json == null)
+            {
+                TempData["Error"] = "Your cart is empty.";
+                return RedirectToAction("ShoppingCart");
+            }
+
+            Dictionary<int, int> cart = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(json);
+            if (cart.Count == 0)
+            {
+                TempData["Error"] = "Your cart is empty.";
+                return RedirectToAction("ShoppingCart");
+            }
+
+            string[] parts = timeSlotInfo.Split('|');
+            int timeSlotId = int.Parse(parts[0]);
+            DateTime date = DateTime.Parse(selectedDate);
+            DateTime start = DateTime.Parse(selectedDate + " " + parts[1]);
+            DateTime end = DateTime.Parse(selectedDate + " " + parts[2]);
+
+            Client client = new Client { Id = HttpContext.Session.GetInt32("Id").Value };
+            Store store = new Store { Id = storeId };
+            TimeSlot timeSlot = new TimeSlot { Id = timeSlotId, Date = date, StartingHour = start, EndingHour = end };
+
+            int orderId = await Order.PlaceOrderAsync(orderDAL, client, store, timeSlot, cart);
+
+            if (orderId <= 0)
+            {
+                TempData["Error"] = "An error occurred while placing your order.";
+                return RedirectToAction("Checkout");
+            }
+
+            HttpContext.Session.Remove("Cart");
+            TempData["Success"] = "Your order has been placed successfully!";
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()

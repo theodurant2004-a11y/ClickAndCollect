@@ -1,16 +1,50 @@
-﻿namespace ClickAndCollect.Models
+﻿using ClickAndCollect.DAL;
+
+namespace ClickAndCollect.Models
 {
     public class Order
     {
-		private int boxUsed;
+        public Client Client { get; set; }
+        public TimeSlot TimeSlot { get; set; }
+
+        private int orderID;
+        private int boxUsed;
 		private int boxReturned;
-        // status
-        private static decimal serviceCharge = 5.95m;
+        private string status;
+        private decimal serviceCharge;
 		List<OrderLine> orderLines;
 
-        public static decimal ServiceCharge
+        public int OrderID
+        {
+            get { return orderID; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Order ID cannot be negative.");
+                orderID = value;
+            }
+        }
+
+        public string Status
+        {
+            get { return status; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Status cannot be null or empty.");
+                status = value;
+            }
+        }
+
+        public decimal ServiceCharge
         {
             get { return serviceCharge; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Service charge cannot be negative.");
+                serviceCharge = value;
+            }
         }
 
         public int BoxUsed
@@ -89,10 +123,12 @@
 
         public void FlushOrder()
         {
-            foreach (OrderLine line in orderLines)
-            {
-                orderLines.Clear();
-            }
+            orderLines.Clear();
+        }
+
+        public static async Task<int> PlaceOrderAsync(IOrderDAL _orderDAL, Client _client, Store _store, TimeSlot _timeSlot, Dictionary<int, int> _cart)
+        {
+            return await _orderDAL.PlaceOrderAsync(_client, _store, _timeSlot, _cart);
         }
     }
 }

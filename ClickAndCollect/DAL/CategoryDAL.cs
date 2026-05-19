@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ClickAndCollect.Models;
+using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace ClickAndCollect.DAL
@@ -12,9 +13,9 @@ namespace ClickAndCollect.DAL
             connectionString = _connectionString;
         }
 
-        public async Task<List<string>> GetCategoriesAsync()
+        public async Task<List<Category>> GetCategoriesAsync()
         {
-            List<string> categories = new List<string>();
+            List<Category> categories = new List<Category>();
 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
@@ -29,7 +30,9 @@ namespace ClickAndCollect.DAL
                     while (await reader.ReadAsync())
                     {
                         string nameCategory = reader.GetString("name");
-                        categories.Add(nameCategory);
+                        Category category = new(nameCategory);
+
+                        categories.Add(category);
                     }
                 }
             }
