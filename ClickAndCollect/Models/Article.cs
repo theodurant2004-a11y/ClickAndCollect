@@ -9,14 +9,25 @@ namespace ClickAndCollect.Models
         private decimal price;
         private string description;
         private Category category;
+        private string imagePath;
 
-        public Article(int _idArticle, string _nameProduct, decimal _price, string _description, Category _category)
+        public Article(int _idArticle, string _nameProduct, decimal _price, string _description, Category _category, string _imagePath)
         {
             IDArticle = _idArticle;
             NameProduct = _nameProduct;
             Price = _price;
             Description = _description;
+            ImagePath = _imagePath;
             Category = _category;
+        }
+
+        public string ImagePath
+        {
+            get { return imagePath; }
+            set 
+            {
+                imagePath = value; 
+            }
         }
 
         public Category Category
@@ -80,6 +91,23 @@ namespace ClickAndCollect.Models
         public static async Task<List<Article>> GetAllArticlesAsync(IArticleDAL _dAL, List<int>? ids = null)
         {
             return await _dAL.GetArticlesAsync(ids);
+        }
+
+        public override string ToString()
+        {
+            return $"{IDArticle} : {NameProduct} {Price:C}, {Category}.";
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj != null)
+                return this.ToString() == obj.ToString();
+            return false;
         }
     }
 }

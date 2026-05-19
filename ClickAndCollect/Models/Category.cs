@@ -26,7 +26,7 @@ namespace ClickAndCollect.Models
             return Name;
         }
 
-        public static async Task<List<string>> GetCategoriesAsync(ICategoryDAL _dAL)
+        public static async Task<List<Category>> GetCategoriesAsync(ICategoryDAL _dAL)
         {
             return await _dAL.GetCategoriesAsync();
         }

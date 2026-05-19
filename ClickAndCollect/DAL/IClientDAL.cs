@@ -8,6 +8,6 @@ namespace ClickAndCollect.DAL
 
         Task<int> AddClientAsync(Client client);
 
-        Task<int> UpdateClientInfo(int? _id, Client _client);
+        Task<int> UpdateClientInfo(Client _client);
     }
 }

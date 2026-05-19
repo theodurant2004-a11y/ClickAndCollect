@@ -5,15 +5,12 @@
 
 <h1 class="mb-4">Shopping Cart</h1>
 
-@* if the shopping cart is empty *@
 @if (Model == null || !Model.OrderLines.Any())
 {
     <div class="text-center py-5">
-        <p class="fs-1">🛒</p>
         <h4 class="fw-bold">Your shopping cart is empty</h4>
         <p class="text-muted">Add some products to get started.</p>
-        <a asp-action="Index" asp-controller="Home" class="btn text-white rounded-pill px-4"
-           style="background-color: #00bcd4;">
+        <a asp-action="Index" asp-controller="Home" class="btn text-white rounded-pill px-4 btn-teal">
             Browse products
         </a>
     </div>
@@ -68,11 +65,10 @@ else
                 <hr />
                 <div class="d-flex justify-content-between fw-bold fs-5">
                     <span>Total</span>
-                    <span>€@((Model.GetTotalPrice() + 5.95m).ToString("0.00"))</span>
+                    <span>€@((Model.GetTotalPrice() + 5.95m ).ToString("0.00"))</span>
                 </div>
                 <a asp-action="Checkout" asp-controller="Home"
-                   class="btn text-white w-100 rounded-pill mt-3 fw-bold"
-                   style="background-color: #00bcd4;">
+                   class="btn text-white w-100 rounded-pill mt-3 fw-bold btn-teal">
                     Proceed to checkout
                 </a>
                 <a asp-action="Index" asp-controller="Home"

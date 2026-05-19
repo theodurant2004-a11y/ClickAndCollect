@@ -1,13 +1,18 @@
-﻿namespace ClickAndCollect.Models
+﻿using ClickAndCollect.DAL;
+
+namespace ClickAndCollect.Models
 {
     public class Order
     {
+        public Client Client { get; set; }
+        public TimeSlot TimeSlot { get; set; }
+
         private int orderID;
         private int boxUsed;
-        private int boxReturned;
+		    private int boxReturned;
         private string status;
-        private double serviceCharge;
-        List<OrderLine> orderLines;
+        private decimal serviceCharge;
+		    List<OrderLine> orderLines;
 
         public int OrderID
         {
@@ -17,6 +22,28 @@
                 if (value < 0)
                     throw new ArgumentException("Order ID cannot be negative.");
                 orderID = value;
+            }
+        }
+
+        public string Status
+        {
+            get { return status; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Status cannot be null or empty.");
+                status = value;
+            }
+        }
+
+        public decimal ServiceCharge
+        {
+            get { return serviceCharge; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Service charge cannot be negative.");
+                serviceCharge = value;
             }
         }
 
@@ -63,8 +90,6 @@
                 serviceCharge = value;
             }
         }
-        public Client Client { get; set; }
-        public TimeSlot TimeSlot { get; set; }
 
         public List<OrderLine> OrderLines
         {
@@ -76,19 +101,19 @@
             orderLines = new List<OrderLine>();
         }
 
-        public void AddArticle(Article _article, int _quantity)//possibilité de modifier avec un contains ou quoi
-        {
+		public void AddArticle(Article _article, int _quantity)
+		{
             //if article already exists in the order, update the quantity
             OrderLine existingLine = null;
             for (int i = 0; i < orderLines.Count && existingLine == null; i++)
             {
-                if (orderLines[i].Article_.IDArticle == _article.IDArticle)
+                if (orderLines[i].Article_ == _article)
                     existingLine = orderLines[i];
             }
-            if (existingLine != null)
-                existingLine.Quantity += _quantity;
-            //else create a new order line with article and quantity
+			if(existingLine != null)
+				existingLine.Quantity += _quantity;
             else
+                //create a new order line with article and quantity
                 orderLines.Add(new OrderLine(_quantity, _article, this));
         }
 
@@ -96,13 +121,14 @@
         {
             for (int i = 0; i < orderLines.Count; i++)
             {
-                if (orderLines[i].Article_.IDArticle == _article.IDArticle)
+                if (orderLines[i].Article_ == _article)
                     orderLines[i].Quantity -= _quantity;
             }
         }
 
         public void RemoveOrderLine(OrderLine _line)
         {
+            //TODO : Dispose of the orderline
             orderLines.Remove(_line);
         }
 
@@ -118,10 +144,12 @@
 
         public void FlushOrder()
         {
-            foreach (OrderLine line in orderLines)
-            {
-                orderLines.Clear();
-            }
+            orderLines.Clear();
+        }
+
+        public static async Task<int> PlaceOrderAsync(IOrderDAL _orderDAL, Client _client, Store _store, TimeSlot _timeSlot, Dictionary<int, int> _cart)
+        {
+            return await _orderDAL.PlaceOrderAsync(_client, _store, _timeSlot, _cart);
         }
     }
 }

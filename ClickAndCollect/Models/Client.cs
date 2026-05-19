@@ -1,6 +1,5 @@
 ﻿using ClickAndCollect.DAL;
 using System.ComponentModel.DataAnnotations;
-
 namespace ClickAndCollect.Models
 {
     public class Client : User
@@ -86,17 +85,25 @@ namespace ClickAndCollect.Models
 
         public static async Task<Client> GetClientByEmail(IClientDAL _dAL, string _email)
         {
+            ArgumentNullException.ThrowIfNull(_email);
             return await _dAL.GetClientByEmail(_email);
         }
 
         public async Task<int> AddClientAsync(IClientDAL _dAL, Client _client)
         {
+            ArgumentNullException.ThrowIfNull(_client);
             return await _dAL.AddClientAsync(_client);
         }
 
         public async Task<int> UpdateClientInfo(IClientDAL _dAL, int? _id, Client _client)
         {
-            return await _dAL.UpdateClientInfo(_id, _client);
+            ArgumentNullException.ThrowIfNull(_client);
+            return await _dAL.UpdateClientInfo(_client);
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $" - {RoadName} {RoadNumber}, {PostalCode} {City} - {Phone}";
         }
     }
 }

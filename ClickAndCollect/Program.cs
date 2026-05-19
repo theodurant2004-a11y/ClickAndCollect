@@ -7,11 +7,12 @@ builder.Services.AddControllersWithViews();
 
 // Add the DAL to the services collection
 string? connectionString = builder.Configuration.GetConnectionString("default");
-builder.Services.AddTransient<IArticleDAL>(aDal => new ArticleDAL(connectionString));
-builder.Services.AddTransient<ICategoryDAL>(catDal => new CategoryDAL(connectionString));
-builder.Services.AddTransient<IClientDAL>(sp => new ClientDAL(connectionString));
-builder.Services.AddTransient<IEmployeeDAL>(empDal => new EmployeeDAL(connectionString));
-builder.Services.AddTransient<IStoreDAL>(storeDal => new StoreDAL(connectionString));
+builder.Services.AddTransient<IArticleDAL>(articleDAL => new ArticleDAL(connectionString));
+builder.Services.AddTransient<ICategoryDAL>(categoryDAL => new CategoryDAL(connectionString));
+builder.Services.AddTransient<IClientDAL>(clientDAL => new ClientDAL(connectionString));
+builder.Services.AddTransient<IEmployeeDAL>(employeeDal => new EmployeeDAL(connectionString));
+builder.Services.AddTransient<IStoreDAL>(storeDAL => new StoreDAL(connectionString));
+builder.Services.AddTransient<IOrderDAL>(orderDAL => new OrderDAL(connectionString));
 
 // Add session services
 builder.Services.AddSession(options =>

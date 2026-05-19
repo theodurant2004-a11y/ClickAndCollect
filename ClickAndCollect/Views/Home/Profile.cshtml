@@ -6,12 +6,10 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-
             <div class="card border-0 shadow-sm rounded-4 p-4">
 
                 <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3"
-                         style="width: 70px; height: 70px; background-color: #1a4a52;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-3 profile-avatar">
                         @Model.FirstName?[0]@Model.SurName?[0]
                     </div>
                     <div>
@@ -49,14 +47,13 @@
 
                 <div class="d-flex gap-2 mt-2">
                     <a asp-action="EditProfile" asp-controller="Home"
-                       class="btn text-white rounded-pill px-4"
-                       style="background-color: #00bcd4;">
+                       class="btn text-white rounded-pill px-4 btn-teal">
                         Edit Profile
                     </a>
-                    @* <a asp-action="Logout" asp-controller="Home"
+                    <a asp-action="Logout" asp-controller="Home"
                        class="btn btn-outline-danger rounded-pill px-4">
                         Logout
-                    </a> *@
+                    </a>
                 </div>
 
             </div>
