@@ -38,7 +38,7 @@ namespace ClickAndCollect.DAL
                 await con.OpenAsync();
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
-                    if (await reader.ReadAsync())
+                    while (await reader.ReadAsync())
                     {
                         int id = (int)reader["personID"];
                         string? firstName = reader["firstName"].ToString();

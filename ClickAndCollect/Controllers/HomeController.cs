@@ -2,6 +2,7 @@ using ClickAndCollect.DAL;
 using ClickAndCollect.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace ClickAndCollect.Controllers
 {
@@ -11,13 +12,15 @@ namespace ClickAndCollect.Controllers
         private readonly ICategoryDAL categoryDAL;
         private readonly IClientDAL clientDAL;
         private readonly IEmployeeDAL employeeDAL;
+        private readonly IStoreDAL storeDAL;
 
-        public HomeController(IArticleDAL _articleDAL, ICategoryDAL _categoryDAL, IClientDAL _clientDAL, IEmployeeDAL _employeeDAL)
+        public HomeController(IArticleDAL _articleDAL, ICategoryDAL _categoryDAL, IClientDAL _clientDAL, IEmployeeDAL _employeeDAL, IStoreDAL _storeDAL)
         {
             articleDAL = _articleDAL;
             categoryDAL = _categoryDAL;
             clientDAL = _clientDAL;
             employeeDAL = _employeeDAL;
+            storeDAL = _storeDAL;
         }
 
         public async Task<IActionResult> Index(string? category)
@@ -179,6 +182,8 @@ namespace ClickAndCollect.Controllers
                     HttpContext.Session.SetInt32("Id", employee.Id);
                     HttpContext.Session.SetString("Email", employee.Email);
                     HttpContext.Session.SetString("FirstName", employee.FirstName);
+                    HttpContext.Session.SetInt32("CashierId", employee.Id);
+                    HttpContext.Session.SetInt32("storeId", employee.StoreID);
                     if (employee is Cashier)
                     {
                         HttpContext.Session.SetString("Type", "Cashier");
@@ -204,21 +209,49 @@ namespace ClickAndCollect.Controllers
             HttpContext.Session.Clear(); 
             return RedirectToAction("Connexion");
         }
-        public IActionResult IndexCashier()
+        public async Task<IActionResult> IndexCashier()
         {
-            if (HttpContext.Session.GetString("Type") != "Cashier")
+            if (HttpContext.Session.GetString("Type") != "Cashier" ||
+                HttpContext.Session.GetInt32("CashierId") == null ||
+                HttpContext.Session.GetInt32("storeId") == null)
             {
                 return RedirectToAction("Connexion");
             }
-            return View();
+
+            int cashierID = HttpContext.Session.GetInt32("CashierId").Value;
+            string firstName = HttpContext.Session.GetString("FirstName");
+
+            try
+            {
+                Cashier currentCashier = await Cashier.GetCashierAsync(cashierID, employeeDAL);
+                currentCashier.FirstName = firstName; 
+
+                List<Order> todaysOrders = await currentCashier.GetTodaysOrdersAsync(storeDAL);
+
+                if (todaysOrders == null || todaysOrders.Count == 0)
+                {
+                    ViewBag.InfoMessage = "No orders to be fulfilled today.";
+                }
+
+                return View(todaysOrders);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "[ERROR]: " + ex.Message;
+                return View(new List<Order>());
+            }
         }
-        public IActionResult IndexPreparator()
+        public async Task<IActionResult> IndexPreparator()
         {
             // Sécurité
             if (HttpContext.Session.GetString("Type") != "Preparator")
             {
                 return RedirectToAction("Connexion");
             }
+
+            
+
+
             return View();
         }
 

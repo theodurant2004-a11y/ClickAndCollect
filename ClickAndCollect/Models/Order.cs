@@ -2,33 +2,69 @@
 {
     public class Order
     {
-		private int boxUsed;
-		private int boxReturned;
-		// status
-		// service charge
-		List<OrderLine> orderLines;
+        private int orderID;
+        private int boxUsed;
+        private int boxReturned;
+        private string status;
+        private double serviceCharge;
+        List<OrderLine> orderLines;
+
+        public int OrderID
+        {
+            get { return orderID; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Order ID cannot be negative.");
+                orderID = value;
+            }
+        }
 
         public int BoxUsed
-		{
-			get { return boxUsed; }
-			set 
-			{
-				if(value < 0)
-					throw new ArgumentException("Box used cannot be negative.");
-                boxUsed = value; 
-			}
-		}
-		
-		public int BoxReturned
         {
-			get { return boxReturned; }
-			set 
-			{
-				if(value < 0)
-					throw new ArgumentException("Box returned cannot be negative.");
-                boxReturned = value; 
-			}
-		}
+            get { return boxUsed; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Box used cannot be negative.");
+                boxUsed = value;
+            }
+        }
+
+        public int BoxReturned
+        {
+            get { return boxReturned; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Box returned cannot be negative.");
+                boxReturned = value;
+            }
+        }
+
+        public string Status
+        {
+            get { return status; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Status cannot be null or empty.");
+                status = value;
+            }
+        }
+
+        public double ServiceCharge
+        {
+            get { return serviceCharge; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Service charge cannot be negative.");
+                serviceCharge = value;
+            }
+        }
+        public Client Client { get; set; }
+        public TimeSlot TimeSlot { get; set; }
 
         public List<OrderLine> OrderLines
         {
@@ -40,24 +76,24 @@
             orderLines = new List<OrderLine>();
         }
 
-		public void AddArticle(Article _article, int _quantity)//possibilité de modifier avec un contains ou quoi
-		{
+        public void AddArticle(Article _article, int _quantity)//possibilité de modifier avec un contains ou quoi
+        {
             //if article already exists in the order, update the quantity
             OrderLine existingLine = null;
-			for(int i = 0; i < orderLines.Count && existingLine == null; i++)
+            for (int i = 0; i < orderLines.Count && existingLine == null; i++)
             {
                 if (orderLines[i].Article_.IDArticle == _article.IDArticle)
                     existingLine = orderLines[i];
             }
-			if(existingLine != null)
-				existingLine.Quantity += _quantity;
+            if (existingLine != null)
+                existingLine.Quantity += _quantity;
             //else create a new order line with article and quantity
             else
                 orderLines.Add(new OrderLine(_quantity, _article, this));
         }
 
-		public void RemoveArticle(Article _article, int _quantity)
-		{
+        public void RemoveArticle(Article _article, int _quantity)
+        {
             for (int i = 0; i < orderLines.Count; i++)
             {
                 if (orderLines[i].Article_.IDArticle == _article.IDArticle)
