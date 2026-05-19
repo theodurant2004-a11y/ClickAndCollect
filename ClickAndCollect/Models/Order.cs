@@ -9,10 +9,10 @@ namespace ClickAndCollect.Models
 
         private int orderID;
         private int boxUsed;
-		    private int boxReturned;
+		private int boxReturned;
         private string status;
         private decimal serviceCharge;
-		    List<OrderLine> orderLines;
+		List<OrderLine> orderLines;
 
         public int OrderID
         {
@@ -66,28 +66,6 @@ namespace ClickAndCollect.Models
                 if (value < 0)
                     throw new ArgumentException("Box returned cannot be negative.");
                 boxReturned = value;
-            }
-        }
-
-        public string Status
-        {
-            get { return status; }
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Status cannot be null or empty.");
-                status = value;
-            }
-        }
-
-        public double ServiceCharge
-        {
-            get { return serviceCharge; }
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentException("Service charge cannot be negative.");
-                serviceCharge = value;
             }
         }
 

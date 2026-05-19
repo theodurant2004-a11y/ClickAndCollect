@@ -18,17 +18,17 @@ namespace ClickAndCollect.Models
         {
         }
         public static async Task<Cashier> GetCashierAsync(int id, int storeId, IEmployeeDAL employeeDAL)
-{
-    Cashier cashier = new Cashier { Id = id };
-    cashier.StoreID = storeId; 
+        {
+            Cashier cashier = new Cashier { Id = id };
+            cashier.StoreID = storeId; 
 
-    cashier.cashierStore = new Store
-    {
-        StoreID = cashier.StoreID 
-    };
+            cashier.cashierStore = new Store
+            {
+                Id = cashier.StoreID 
+            };
 
-    return cashier;
-}
+            return cashier;
+        }
 
         public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL)
         {
