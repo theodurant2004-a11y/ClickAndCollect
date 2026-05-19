@@ -44,7 +44,7 @@ namespace ClickAndCollect.DAL
                     );
 
                 //cmd.Parameters.AddWithValue("storeID", cashier.StoreID);
-                //cmd.Parameters.AddWithValue("status", "Prepared");
+                //cmd.Parameters.AddWithValue("status", "Prepared");=
                 await con.OpenAsync();
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
