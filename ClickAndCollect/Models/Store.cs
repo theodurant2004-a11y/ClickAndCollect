@@ -35,10 +35,14 @@ namespace ClickAndCollect.Models
             Name = _name;
             Address = _adresse;
         }
-
         public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL, Cashier cashier)
         {
             return await storeDAL.GetTodaysOrdersAsync(cashier);
+        }
+
+        public async Task<List<Order>> GetOrderToPrepareAsync(IStoreDAL storeDAL, Preparator preparator)
+        {
+            return await storeDAL.GetOrderToPrepareAsync(preparator);
         }
     }
 }
