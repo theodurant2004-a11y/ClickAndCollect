@@ -11,6 +11,7 @@ namespace ClickAndCollect.Models
         private string city;
         private string postalCode;
         private int id;
+      
         public int Id
         {
             get { return id; }
@@ -85,6 +86,16 @@ namespace ClickAndCollect.Models
         public static async Task<List<TimeSlot>> GetAvailableTimeSlotsAsync(IStoreDAL _storeDAL, Store _store)
         {
             return await _storeDAL.GetAvailableTimeSlotsAsync(_store);
+        }
+      
+      public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL, Cashier cashier)
+        {
+            return await storeDAL.GetTodaysOrdersAsync(cashier);
+        }
+
+        public async Task<List<Order>> GetOrderToPrepareAsync(IStoreDAL storeDAL, Preparator preparator)
+        {
+            return await storeDAL.GetOrderToPrepareAsync(preparator);
         }
     }
 }

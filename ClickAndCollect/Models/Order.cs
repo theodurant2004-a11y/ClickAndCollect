@@ -9,10 +9,10 @@ namespace ClickAndCollect.Models
 
         private int orderID;
         private int boxUsed;
-		private int boxReturned;
+		    private int boxReturned;
         private string status;
         private decimal serviceCharge;
-		List<OrderLine> orderLines;
+		    List<OrderLine> orderLines;
 
         public int OrderID
         {
@@ -48,26 +48,48 @@ namespace ClickAndCollect.Models
         }
 
         public int BoxUsed
-		{
-			get { return boxUsed; }
-			set 
-			{
-				if(value < 0)
-					throw new ArgumentException("Box used cannot be negative.");
-                boxUsed = value; 
-			}
-		}
-		
-		public int BoxReturned
         {
-			get { return boxReturned; }
-			set 
-			{
-				if(value < 0)
-					throw new ArgumentException("Box returned cannot be negative.");
-                boxReturned = value; 
-			}
-		}
+            get { return boxUsed; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Box used cannot be negative.");
+                boxUsed = value;
+            }
+        }
+
+        public int BoxReturned
+        {
+            get { return boxReturned; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Box returned cannot be negative.");
+                boxReturned = value;
+            }
+        }
+
+        public string Status
+        {
+            get { return status; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Status cannot be null or empty.");
+                status = value;
+            }
+        }
+
+        public double ServiceCharge
+        {
+            get { return serviceCharge; }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Service charge cannot be negative.");
+                serviceCharge = value;
+            }
+        }
 
         public List<OrderLine> OrderLines
         {
@@ -83,7 +105,7 @@ namespace ClickAndCollect.Models
 		{
             //if article already exists in the order, update the quantity
             OrderLine existingLine = null;
-			for(int i = 0; i < orderLines.Count && existingLine == null; i++)
+            for (int i = 0; i < orderLines.Count && existingLine == null; i++)
             {
                 if (orderLines[i].Article_ == _article)
                     existingLine = orderLines[i];
@@ -95,9 +117,8 @@ namespace ClickAndCollect.Models
                 orderLines.Add(new OrderLine(_quantity, _article, this));
         }
 
-		public void RemoveArticle(Article _article, int _quantity)
-		{
-            
+        public void RemoveArticle(Article _article, int _quantity)
+        {
             for (int i = 0; i < orderLines.Count; i++)
             {
                 if (orderLines[i].Article_ == _article)
