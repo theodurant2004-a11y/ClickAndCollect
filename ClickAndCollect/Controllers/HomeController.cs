@@ -143,33 +143,26 @@ namespace ClickAndCollect.Controllers
                 return RedirectToAction("Connexion");
             }
 
-            int? cashierID = HttpContext.Session.GetInt32("CashierId");
-            int? storeId = HttpContext.Session.GetInt32("storeId");
-
-            Cashier currentCashier = new Cashier
-            {
-                Id = cashierID.Value,
-                StoreID = storeId.Value
-            };
+            int cashierID = HttpContext.Session.GetInt32("CashierId").Value;
+            string firstName = HttpContext.Session.GetString("FirstName");
 
             try
             {
-                List<Order> todaysOrders = await storeDAL.GetTodaysOrdersAsync(currentCashier);
+                Cashier currentCashier = await Cashier.GetCashierAsync(cashierID, employeeDAL);
+                currentCashier.FirstName = firstName; 
 
-                if (todaysOrders == null)
+                List<Order> todaysOrders = await currentCashier.GetTodaysOrdersAsync(storeDAL);
+
+                if (todaysOrders == null || todaysOrders.Count == 0)
                 {
                     ViewBag.InfoMessage = "No orders to be fulfilled today.";
-                }
-                if (todaysOrders.Count == 0)
-                {
-                    ViewBag.InfoMessage = "No orders to be 0 today.";
                 }
 
                 return View(todaysOrders);
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage = "Une erreur est survenue lors de la récupération des commandes : " + ex.Message;
+                ViewBag.ErrorMessage = "[ERROR]: " + ex.Message;
                 return View(new List<Order>());
             }
         }

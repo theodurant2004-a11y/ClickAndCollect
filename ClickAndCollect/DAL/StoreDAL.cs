@@ -15,7 +15,7 @@ namespace ClickAndCollect.DAL
 
         public async Task<List<Order>> GetTodaysOrdersAsync(Cashier cashier)
         {
-            List<Order> orders = new List<Order>();
+            List<Order> allStoreOrders = new List<Order>();
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 SqlCommand cmd = new SqlCommand
@@ -36,15 +36,10 @@ namespace ClickAndCollect.DAL
                         FROM Order_ o
                         JOIN Timeslot t ON o.timeSlotID = t.timeSlotID
                         JOIN Client c   ON o.personID = c.personID
-                        JOIN Person p   ON c.personID = p.personID
-                        WHERE o.storeID = 1
-                            AND o.status = 'Prepared'
-                            AND t.date_ = CAST(GETDATE() AS DATE);"
+                        JOIN Person p   ON c.personID = p.personID"
                         , con
                     );
 
-                //cmd.Parameters.AddWithValue("storeID", cashier.StoreID);
-                //cmd.Parameters.AddWithValue("status", "Prepared");=
                 await con.OpenAsync();
                 using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                 {
@@ -67,24 +62,38 @@ namespace ClickAndCollect.DAL
                         DateTime startingHour = date.Add(startingHourSpan);
                         DateTime endingHour = date.Add(endingHourSpan);
 
-                        Client tempClient = new Client{Id = personID, FirstName = firstName, SurName = lastName};
-                        TimeSlot tempTimeSlot = new TimeSlot(date, startingHour, endingHour);
-                        Order order = new Order
+                        int currentId = reader.GetInt32(5);
+
+                        if (currentId == cashier.StoreID && date.Date >= DateTime.Today)
                         {
-                            OrderID = orderId,
-                            BoxUsed = boxUsed,
-                            BoxReturned = boxReturned,
-                            ServiceCharge = serviceCharge,
-                            Status = status,
-                            Client = tempClient,
-                            TimeSlot = tempTimeSlot
-                        }; 
-                        orders.Add(order);
+                            Client tempClient = new Client { Id = personID, FirstName = firstName, SurName = lastName };
+                            TimeSlot tempTimeSlot = new TimeSlot(date, startingHour, endingHour);
+                            Order order = new Order
+                            {
+                                OrderID = orderId,
+                                BoxUsed = boxUsed,
+                                BoxReturned = boxReturned,
+                                ServiceCharge = serviceCharge,
+                                Status = status,
+                                Client = tempClient,
+                                TimeSlot = tempTimeSlot
+                            };
+                            allStoreOrders.Add(order);
+                        }
                     }
                 }
             }
-            return orders;  
 
+            List<Order> todaysOrders = new List<Order>();
+
+            foreach (var order in allStoreOrders)
+            {
+                if (order.Status == "Prepared" && order.TimeSlot.Date.Date == DateTime.Today)
+                {
+                    todaysOrders.Add(order);
+                }
+            }
+            return todaysOrders;
         }
     }
 }
