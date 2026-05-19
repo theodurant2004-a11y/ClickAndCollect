@@ -220,11 +220,12 @@ namespace ClickAndCollect.Controllers
 
             int cashierID = HttpContext.Session.GetInt32("CashierId").Value;
             string firstName = HttpContext.Session.GetString("FirstName");
+            int storeId = HttpContext.Session.GetInt32("storeId").Value;
 
             try
             {
-                Cashier currentCashier = await Cashier.GetCashierAsync(cashierID, employeeDAL);
-                currentCashier.FirstName = firstName; 
+                Cashier currentCashier = await Cashier.GetCashierAsync(cashierID, storeId, employeeDAL);
+                currentCashier.FirstName = firstName;
 
                 List<Order> todaysOrders = await currentCashier.GetTodaysOrdersAsync(storeDAL);
 
@@ -243,16 +244,37 @@ namespace ClickAndCollect.Controllers
         }
         public async Task<IActionResult> IndexPreparator()
         {
-            // Sécurité
-            if (HttpContext.Session.GetString("Type") != "Preparator")
+            if (HttpContext.Session.GetString("Type") != "Preparator" ||
+                HttpContext.Session.GetInt32("Id") == null ||
+                HttpContext.Session.GetInt32("storeId") == null)
             {
                 return RedirectToAction("Connexion");
             }
 
-            
+            int preparatorID = HttpContext.Session.GetInt32("Id").Value;
+            string firstName = HttpContext.Session.GetString("FirstName");
 
+            int storeId = HttpContext.Session.GetInt32("storeId").Value;
 
-            return View();
+            try
+            {
+                Preparator currentPreparator = await Preparator.GetPreparatorAsync(preparatorID, storeId, employeeDAL);
+                currentPreparator.FirstName = firstName;
+
+                List<Order> ordersToPrepare = await currentPreparator.GetOrderToPrepareAsync(storeDAL);
+
+                if (ordersToPrepare == null || ordersToPrepare.Count == 0)
+                {
+                    ViewBag.InfoMessage = "No orders to be fulfilled today.";
+                }
+
+                return View(ordersToPrepare);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "[ERROR]: " + ex.Message;
+                return View(new List<Order>());
+            }
         }
 
         public async Task<IActionResult> Profile()
