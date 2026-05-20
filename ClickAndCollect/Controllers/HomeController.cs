@@ -63,7 +63,7 @@ namespace ClickAndCollect.Controllers
 
             Dictionary<int, int> cart = null;
             string jsonCart = HttpContext.Session.GetString("Cart");
-            if(jsonCart != null)
+            if (jsonCart != null)
                 cart = System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(jsonCart);
             else
                 cart = new Dictionary<int, int>();
@@ -202,9 +202,9 @@ namespace ClickAndCollect.Controllers
         {
             var client = await clientDAL.GetClientByEmail(loginInfo.Email);
 
-            if(client != null)
+            if (client != null)
             {
-                if(loginInfo.Password == client.Password)
+                if (loginInfo.Password == client.Password)
                 {
                     HttpContext.Session.SetInt32("Id", client.Id);
                     HttpContext.Session.SetString("Email", client.Email);
@@ -221,7 +221,7 @@ namespace ClickAndCollect.Controllers
             }
 
             var employee = await employeeDAL.GetEmployeeByEmail(loginInfo.Email);
-            if(employee != null)
+            if (employee != null)
             {
                 if (loginInfo.Password == employee.Password)
                 {
@@ -252,7 +252,7 @@ namespace ClickAndCollect.Controllers
         }
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); 
+            HttpContext.Session.Clear();
             return RedirectToAction("Connexion");
         }
         public async Task<IActionResult> IndexCashier()
@@ -288,6 +288,79 @@ namespace ClickAndCollect.Controllers
                 return View(new List<Order>());
             }
         }
+
+        // GET : affiche les détails de la commande (articles, prix, boîtes)
+        public async Task<IActionResult> FinalizeOrder(int orderId)
+        {
+            if (HttpContext.Session.GetString("Type") != "Cashier")
+            {
+                TempData["Error"] = "You must be logged in as a cashier.";
+                return RedirectToAction("Connexion");
+            }
+
+            try
+            {
+                Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
+
+                if (order == null)
+                {
+                    TempData["Error"] = "Order not found.";
+                    return RedirectToAction("IndexCashier");
+                }
+
+                // Passer en "Delivering" dès que le cashier ouvre la commande
+                if (order.Status != "Delivered")
+                {
+                    order.Status = "Delivering";
+                    await orderDAL.FinalizeOrderAsync(order);
+                }
+
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred: " + ex.Message;
+                return RedirectToAction("IndexCashier");
+            }
+        }
+
+        // POST : clôture définitive de la commande (status Delivered + boîtes)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CloseFinalizeOrder(int orderId, int boxUsed, int boxReturned)
+        {
+            if (HttpContext.Session.GetString("Type") != "Cashier")
+            {
+                TempData["Error"] = "You must be logged in as a cashier.";
+                return RedirectToAction("Connexion");
+            }
+
+            try
+            {
+                Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
+
+                if (order == null)
+                {
+                    TempData["Error"] = "Order not found.";
+                    return RedirectToAction("IndexCashier");
+                }
+
+                int rows = await order.FinalizeOrderAsync(orderDAL, boxUsed, boxReturned);
+
+                if (rows == 0)
+                    TempData["Error"] = "An error occurred while closing the order.";
+                else
+                    TempData["Success"] = "Order delivered successfully!";
+
+                return RedirectToAction("IndexCashier");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred: " + ex.Message;
+                return RedirectToAction("IndexCashier");
+            }
+        }
+
         public async Task<IActionResult> IndexPreparator()
         {
             if (HttpContext.Session.GetString("Type") != "Preparator" ||
@@ -529,6 +602,172 @@ namespace ClickAndCollect.Controllers
             {
                 TempData["Error"] = "An error occurred while Inserting the order.";
                 return RedirectToAction("Error");
+            }
+        }
+
+
+        // POST: Remove one item from order
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveItemFromOrder(int orderId, int articleId)
+        {
+            if (HttpContext.Session.GetString("Type") != "Cashier")
+                return RedirectToAction("Connexion");
+            try
+            {
+                await orderDAL.RemoveItemFromOrderAsync(orderId, articleId);
+                return RedirectToAction("FinalizeOrder", new { orderId = orderId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error removing article: " + ex.Message;
+                return RedirectToAction("FinalizeOrder", new { orderId = orderId });
+            }
+        }
+
+        // POST: Update box counts on an order
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateBoxes(int orderId, int boxUsed, int boxReturned)
+        {
+            if (HttpContext.Session.GetString("Type") != "Cashier")
+                return RedirectToAction("Connexion");
+            try
+            {
+                Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
+                if (order == null)
+                {
+                    TempData["Error"] = "Order not found.";
+                    return RedirectToAction("IndexCashier");
+                }
+                order.BoxUsed = boxUsed;
+                order.BoxReturned = boxReturned;
+                await orderDAL.FinalizeOrderAsync(order);
+                return RedirectToAction("FinalizeOrder", new { orderId = orderId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error updating boxes: " + ex.Message;
+                return RedirectToAction("FinalizeOrder", new { orderId = orderId });
+            }
+        }
+
+        // POST: Cancel — go back to IndexCashier, reset status to Prepared
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelFinalizeOrder(int orderId)
+        {
+            if (HttpContext.Session.GetString("Type") != "Cashier")
+                return RedirectToAction("Connexion");
+            try
+            {
+                Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
+                if (order != null)
+                {
+                    order.Status = "Prepared";
+                    await orderDAL.FinalizeOrderAsync(order);
+                }
+                return RedirectToAction("IndexCashier");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error cancelling: " + ex.Message;
+                return RedirectToAction("IndexCashier");
+            }
+        }
+
+
+        // GET: Show order details for preparation
+        public async Task<IActionResult> PrepareOrder(int orderId)
+        {
+            if (HttpContext.Session.GetString("Type") != "Preparator")
+            {
+                TempData["Error"] = "You must be logged in as a preparator.";
+                return RedirectToAction("Connexion");
+            }
+            try
+            {
+                Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
+                if (order == null)
+                {
+                    TempData["Error"] = "Order not found.";
+                    return RedirectToAction("IndexPreparator");
+                }
+
+                // Mark as InPreparation as soon as preparator opens it
+                if (order.Status == "Ordered")
+                {
+                    order.Status = "InPreparation";
+                    order.BoxUsed = 0;
+                    await orderDAL.PrepareOrderAsync(order);
+                }
+
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred: " + ex.Message;
+                return RedirectToAction("IndexPreparator");
+            }
+        }
+
+        // POST: Finalize preparation — set boxes + status Prepared
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ClosePrepareOrder(int orderId, int boxUsed)
+        {
+            if (HttpContext.Session.GetString("Type") != "Preparator")
+            {
+                TempData["Error"] = "You must be logged in as a preparator.";
+                return RedirectToAction("Connexion");
+            }
+            try
+            {
+                Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
+                if (order == null)
+                {
+                    TempData["Error"] = "Order not found.";
+                    return RedirectToAction("IndexPreparator");
+                }
+
+                int rows = await order.PrepareOrderAsync(orderDAL, boxUsed, "Prepared");
+
+                if (rows == 0)
+                    TempData["Error"] = "An error occurred while marking the order as prepared.";
+                else
+                    TempData["Success"] = "Order marked as prepared!";
+
+                return RedirectToAction("IndexPreparator");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred: " + ex.Message;
+                return RedirectToAction("IndexPreparator");
+            }
+        }
+
+        // POST: Cancel preparation — go back, reset to Ordered
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelPrepareOrder(int orderId)
+        {
+            if (HttpContext.Session.GetString("Type") != "Preparator")
+                return RedirectToAction("Connexion");
+            try
+            {
+                Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
+                if (order != null)
+                {
+                    order.Status = "Ordered";
+                    order.BoxUsed = 0;
+                    await orderDAL.PrepareOrderAsync(order);
+                }
+                return RedirectToAction("IndexPreparator");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error cancelling: " + ex.Message;
+                return RedirectToAction("IndexPreparator");
             }
         }
 

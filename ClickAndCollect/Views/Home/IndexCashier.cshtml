@@ -1,21 +1,26 @@
 ﻿@model List<ClickAndCollect.Models.Order>
-
 @{
-    ViewData["Title"] = "Commandes du jour";
+    ViewData["Title"] = "Ordersday";
 }
-
 <div class="container mt-4">
-    <h2>Commandes à remettre aujourd'hui</h2>
+    <h2>Today's order</h2>
     <hr />
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
     @if (ViewBag.ErrorMessage != null)
     {
         <div class="alert alert-danger">
-            <h4>Erreur de Base de Données</h4>
-            <p>@ViewBag.ErrorMessage</p>
+            <h4>Database error please contact the support</h4>
+            <p>[ERROR]: @ViewBag.ErrorMessage</p>
         </div>
     }
-
     @if (ViewBag.InfoMessage != null)
     {
         <div class="alert alert-info text-center">
@@ -27,26 +32,49 @@
         <table class="table table-striped table-hover mt-3">
             <thead class="table-dark">
                 <tr>
-                    <th>Nom du Client</th>
-                    <th>Créneau de Retrait</th>
+                    <th>Client Name</th>
+                    <th>Order Line</th>
+                    <th>Status</th>
                     <th class="text-center">Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var order in Model)
                 {
-                    <tr>
+                    <tr class="@(order.Status == "Delivered" ? "table-success" : "")">
                         <td class="align-middle">
                             @order.Client.FirstName @order.Client.SurName
                         </td>
                         <td class="align-middle">
                             @order.TimeSlot.StartingHour.ToString("HH:mm") - @order.TimeSlot.EndingHour.ToString("HH:mm")
                         </td>
-                        <td class="text-center">
-                            <a asp-action="FinalizeOrder" asp-controller="Home" asp-route-id="@order.OrderID" class="btn btn-primary btn-sm">
-                                Prendre en charge
-                            </a>
+                        <td class="align-middle">
+                            @order.Status
                         </td>
+                        @if (order.Status == "Delivered")
+                        {
+                            <td class="text-center align-middle">
+                                <span class="badge bg-success">Finalisée</span>
+                            </td>
+                        }
+                        else if (order.Status == "Delivering")
+                        {
+                            <td class="text-center align-middle">
+                                <a asp-action="FinalizeOrder" asp-route-orderId="@order.OrderID"
+                                   class="btn btn-warning btn-sm">
+                                    Delivering
+                                </a>
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="text-center align-middle">
+                                <a asp-action="FinalizeOrder" asp-route-orderId="@order.OrderID"
+                                   class="btn btn-primary btn-sm">
+                                    Finalize
+                                </a>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
