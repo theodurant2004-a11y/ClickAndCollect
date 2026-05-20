@@ -8,6 +8,5 @@ namespace ClickAndCollect.DAL
         Task<List<Store>> GetStoresAsync();
         Task<List<TimeSlot>> GetAvailableTimeSlotsAsync(Store _store);
         Task<List<Order>> GetOrderToPrepareAsync(Preparator preparator);
-        Task<Order> GetOrderByIdAsync(int orderId);
     }
 }

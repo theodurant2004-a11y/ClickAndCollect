@@ -28,7 +28,7 @@
                     {
                         <div class="form-check custom-filter-radio mb-2">
                             <input class="form-check-input" type="radio" name="category" value="@categories[i]" id="cat_@categories[i]"
-                                   @(selectedCategory == categories[i] ? "checked" : "") />
+                                   @(selectedCategory == categories[i].Name ? "checked" : "") />
                             <label class="form-check-label fst-italic" for="cat_@categories[i]">@categories[i]</label>
                         </div>
                     }
@@ -39,7 +39,7 @@
                     {
                         <div class="form-check custom-filter-radio mb-2">
                             <input class="form-check-input" type="radio" name="category" value="@categories[i]" id="cat_@categories[i]"
-                                   @(selectedCategory == categories[i] ? "checked" : "") />
+                                   @(selectedCategory == categories[i].Name ? "checked" : "") />
                             <label class="form-check-label fst-italic" for="cat_@categories[i]">@categories[i]</label>
                         </div>
                     }

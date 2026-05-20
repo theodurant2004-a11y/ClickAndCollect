@@ -532,63 +532,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> FinalizeOrder(int id)
-        {
-
-            Order currentOrder = await Order.GetOrderAsync(id, storeDAL);
-
-            if (currentOrder == null)
-            {
-                ViewBag.ErrorMessage = "Commande introuvable.";
-                return RedirectToAction("IndexCashier");
-            }
-
-            HttpContext.Session.SetInt32("CurrentOrderId", id);
-
-            return View(currentOrder);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CancelFinalizeOrder()
-        {
-            HttpContext.Session.Remove("CurrentOrderId");
-            return RedirectToAction("IndexCashier"); 
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveItemFromOrder(int itemId)
-        {
-            int? orderId = HttpContext.Session.GetInt32("CurrentOrderId");
-            if (orderId == null) return RedirectToAction("IndexCashier");
-
-            Order currentOrder = await Order.GetOrderAsync(orderId.Value, storeDAL);
-
-            currentOrder.RemoveItem(itemId);
-
-            decimal newPrice = currentOrder.GetTotalPrice();
-
-            return View("FinalizeOrder"); 
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ManageBoxReturn(int returnedBoxes)
-        {
-            int? orderId = HttpContext.Session.GetInt32("CurrentOrderId");
-            if (orderId == null) return RedirectToAction("IndexCashier");
-
-            Order currentOrder = await Order.GetOrderAsync(orderId.Value, storeDAL);
-
-            currentOrder.ManageBoxReturn(returnedBoxes);
-
-            decimal newPrice = currentOrder.GetTotalPrice();
-
-            return View("FinalizeOrder");
-        }
-
         public IActionResult Privacy()
         {
             return View();
