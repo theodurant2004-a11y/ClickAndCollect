@@ -167,5 +167,72 @@ namespace ClickAndCollect.DAL
             }
             return ordersToPrepare;
         }
+        public async Task<Order> GetOrderByIdAsync(int orderId)
+        {
+            Order currentOrder = null;
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlCommand cmdOrder = new SqlCommand(
+                    @"SELECT o.orderID, o.boxUsed, o.boxReturned, o.serviceCharge, o.status, 
+                             o.storeID, o.timeSlotID, o.personID, p.firstName, p.lastname
+                      FROM Order_ o
+                      JOIN Client c ON o.personID = c.personID
+                      JOIN Person p ON c.personID = p.personID
+                      WHERE o.orderID = @orderId", con);
+
+                cmdOrder.Parameters.AddWithValue("@orderId", orderId);
+
+                await con.OpenAsync();
+
+                using (SqlDataReader reader = await cmdOrder.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        Client tempClient = new Client { Id = reader.GetInt32(7), FirstName = reader.GetString(8), SurName = reader.GetString(9) };
+
+                        currentOrder = new Order
+                        {
+                            OrderID = reader.GetInt32(0),
+                            BoxUsed = reader.GetInt32(1),
+                            BoxReturned = reader.GetInt32(2),
+                            ServiceCharge = (double)reader.GetDecimal(3),
+                            Status = reader.GetString(4),
+                            Client = tempClient
+                        };
+                    }
+                }
+
+                if (currentOrder != null)
+                {
+                    SqlCommand cmdLines = new SqlCommand(
+                        @"SELECT ol.quantity, a.articleID, a.name, a.price
+                          FROM OrderLine ol
+                          JOIN Article a ON ol.articleID = a.articleID
+                          WHERE ol.orderID = @orderId", con);
+
+                    cmdLines.Parameters.AddWithValue("@orderId", orderId);
+
+                    using (SqlDataReader readerLines = await cmdLines.ExecuteReaderAsync())
+                    {
+                        while (await readerLines.ReadAsync())
+                        {
+                            int quantity = readerLines.GetInt32(0);
+
+                            Article tempArticle = new Article
+                            {
+                                IDArticle = readerLines.GetInt32(1),
+                                NameProduct = readerLines.GetString(2),
+                                Price = readerLines.GetDecimal(3)
+                            };
+
+                            currentOrder.AddArticle(tempArticle, quantity);
+                        }
+                    }
+                }
+            }
+
+            return currentOrder;
+        }
     }
 }

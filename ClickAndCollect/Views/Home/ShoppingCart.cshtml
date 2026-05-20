@@ -1,85 +1,108 @@
 ﻿@model Order
 @{
     ViewData["Title"] = "Shopping Cart";
+    int totalItems = Model?.OrderLines?.Sum(l => l.Quantity) ?? 0;
 }
 
-<h1 class="mb-4">Shopping Cart</h1>
+<div class="cart-container mt-4 mb-5">
 
-@* if the shopping cart is empty *@
-@if (Model == null || !Model.OrderLines.Any())
-{
-    <div class="text-center py-5">
-        <p class="fs-1">🛒</p>
-        <h4 class="fw-bold">Your shopping cart is empty</h4>
-        <p class="text-muted">Add some products to get started.</p>
-        <a asp-action="Index" asp-controller="Home" class="btn text-white rounded-pill px-4"
-           style="background-color: #00bcd4;">
-            Browse products
+    <div class="d-flex align-items-baseline mb-4">
+        <h1 class="cart-title me-3">My Cart</h1>
+        <span class="text-muted fst-italic">(@totalItems Product@(totalItems > 1 ? "s" : ""))</span>
+
+        <a asp-action="Index" asp-controller="Home" class="ms-auto text-muted text-decoration-none hover-teal">
+            <i class="bi bi-arrow-left"></i> Return to catalog
         </a>
     </div>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-8">
-            @foreach (OrderLine line in Model.OrderLines)
-            {
-                <div class="card border-0 shadow-sm rounded-4 mb-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="fw-bold mb-0">@line.Article_.NameProduct</h5>
-                            <p class="text-muted small mb-1">@line.Article_.Category.Name</p>
-                            <p class="text-muted small mb-0">€@line.Article_.Price.ToString("0.00") / unit</p>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="d-flex align-items-center gap-2">
-                                <form asp-action="RemoveOneFromCart" asp-controller="Home" method="post">
-                                    <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill">−</button>
-                                </form>
-                                <span class="fw-bold">@line.Quantity</span>
-                                <form asp-action="AddToCart" asp-controller="Home" method="post">
-                                    <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
-                                    <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill">+</button>
-                                </form>
+
+    @if (Model == null || !Model.OrderLines.Any())
+    {
+        <div class="empty-cart-box text-center py-5 rounded-4 shadow-sm">
+            <i class="bi bi-basket3 empty-cart-icon mb-3"></i>
+            <h4 class="fw-bold text-dark">Your shopping cart is empty</h4>
+            <p class="text-muted mb-4">Looks like you haven't added any fresh produce yet.</p>
+            <a asp-action="Index" asp-controller="Home" class="btn btn-primary-teal rounded-pill px-5 py-2">
+                Browse products
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row gx-lg-5">
+
+            <div class="col-lg-8">
+                <div class="cart-items-list">
+                    @foreach (OrderLine line in Model.OrderLines)
+                    {
+                        <div class="cart-item-card d-flex justify-content-between align-items-center p-3 mb-3">
+
+                            <div class="item-info">
+                                <h5 class="fw-bold mb-1 text-dark">@line.Article_.NameProduct</h5>
+                                <span class="badge bg-light text-secondary mb-1">@line.Article_.Category.Name</span>
+                                <p class="text-muted small mb-0">€@line.Article_.Price.ToString("0.00") / unit</p>
                             </div>
-                            <span class="fw-bold text-success">€@line.GetPriceLine().ToString("0.00")</span>
-                            <form asp-action="RemoveFromCart" asp-controller="Home" method="post">
-                                <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">X</button>
-                            </form>
+
+                            <div class="item-actions d-flex align-items-center gap-4">
+
+                                <div class="quantity-selector d-flex align-items-center rounded-pill">
+                                    <form asp-action="RemoveOneFromCart" asp-controller="Home" method="post" class="m-0">
+                                        <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
+                                        <button type="submit" class="btn btn-qty border-0">−</button>
+                                    </form>
+
+                                    <span class="qty-number fw-bold px-3">@line.Quantity</span>
+
+                                    <form asp-action="AddToCart" asp-controller="Home" method="post" class="m-0">
+                                        <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
+                                        <input type="hidden" name="quantity" value="1" />
+                                        <button type="submit" class="btn btn-qty border-0">+</button>
+                                    </form>
+                                </div>
+
+                                <span class="fw-bold text-teal fs-5" style="min-width: 80px; text-align: right;">
+                                    €@line.GetPriceLine().ToString("0.00")
+                                </span>
+
+                                <form asp-action="RemoveFromCart" asp-controller="Home" method="post" class="m-0">
+                                    <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
+                                    <button type="submit" class="btn btn-remove rounded-circle" title="Remove item">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
-            }
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-4">
-                <h5 class="fw-bold mb-3">Order Summary</h5>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Subtotal</span>
-                    <span>€@Model.GetTotalPrice().ToString("0.00")</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Service charge</span>
-                    <span>€5.95</span>
-                </div>
-                <hr />
-                <div class="d-flex justify-content-between fw-bold fs-5">
-                    <span>Total</span>
-                    <span>€@((Model.GetTotalPrice() + 5.95m).ToString("0.00"))</span>
-                </div>
-                <a asp-action="Checkout" asp-controller="Home"
-                   class="btn text-white w-100 rounded-pill mt-3 fw-bold"
-                   style="background-color: #00bcd4;">
-                    Proceed to checkout
-                </a>
-                <a asp-action="Index" asp-controller="Home"
-                   class="btn btn-outline-secondary w-100 rounded-pill mt-2">
-                    Continue shopping
-                </a>
             </div>
+
+            <div class="col-lg-4">
+                <div class="summary-card p-4 sticky-top" style="top: 20px;">
+                    <h4 class="fw-bold mb-4">Récapitulatif de votre commande</h4>
+
+                    <div class="summary-line d-flex justify-content-between mb-3">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-bold">€@Model.GetTotalPrice().ToString("0.00")</span>
+                    </div>
+
+                    <div class="summary-line d-flex justify-content-between mb-3">
+                        <span class="text-muted">Service charge</span>
+                        <span class="fw-bold">€5.95</span>
+                    </div>
+
+                    <hr class="my-4 border-secondary opacity-25" />
+
+                    <div class="summary-total d-flex justify-content-between fw-bold fs-4 mb-4">
+                        <span>Total</span>
+                        <span class="text-teal">€@((Model.GetTotalPrice() + 5.95m).ToString("0.00"))</span>
+                    </div>
+
+                    <a asp-action="Checkout" asp-controller="Home" class="btn btn-primary-teal w-100 rounded-pill py-2 fw-bold shadow-sm">
+                        Proceed to checkout
+                    </a>
+                </div>
+            </div>
+
         </div>
-    </div>
-}
+    }
+</div>

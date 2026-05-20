@@ -1,4 +1,7 @@
-﻿namespace ClickAndCollect.Models
+﻿using ClickAndCollect.DAL;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ClickAndCollect.Models
 {
     public class Order
     {
@@ -122,6 +125,31 @@
             {
                 orderLines.Clear();
             }
+        }
+        public static async Task<Order> GetOrderAsync(int idOrder, IStoreDAL storeDAL)
+        {
+            return await storeDAL.GetOrderByIdAsync(idOrder);
+        }
+
+        public void RemoveItem(int idItem)
+        {
+            for (int i = 0; i < orderLines.Count; i++)
+            {
+                if (orderLines[i].Article_.IDArticle == idItem)
+                {
+                    orderLines[i].Quantity -= 1; 
+
+                    if (orderLines[i].Quantity <= 0)
+                    {
+                        orderLines.RemoveAt(i); 
+                    }
+                    break;
+                }
+            }
+        }
+        public void ManageBoxReturn(int returnedBoxes)
+        {
+            this.BoxReturned = returnedBoxes;
         }
     }
 }

@@ -6,5 +6,6 @@ namespace ClickAndCollect.DAL
     {
         Task<List<Order>> GetTodaysOrdersAsync(Cashier cashier);
         Task<List<Order>> GetOrderToPrepareAsync(Preparator preparator);
+        Task<Order> GetOrderByIdAsync(int orderId);
     }
 }

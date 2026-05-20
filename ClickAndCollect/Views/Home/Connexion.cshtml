@@ -3,45 +3,66 @@
     ViewData["Title"] = "Connexion";
 }
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center">
-    <div class="rounded-4 shadow-lg p-5" style="width: 100%; max-width: 500px; background-color: white;">
+<div class="login-page-bg d-flex align-items-center justify-content-center min-vh-100">
 
-        <h3 class="fw-bold text-center mb-1">Connexion</h3>
-        <p class="text-muted text-center small mb-4">Content de vous revoir !</p>
+    <div class="login-card shadow-lg d-flex overflow-hidden rounded-4">
 
+        <div class="login-left d-none d-md-flex flex-column justify-content-between position-relative">
 
-        @if (ViewBag.ErrorMessage != null)
-        {
-            <div class="alert alert-danger small py-2 text-center">
-                @ViewBag.ErrorMessage
-            </div>
-        }
-
-        <form method="post" asp-action="Connexion" asp-controller="Home">
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label fw-semibold">Email</label>
-                <input asp-for="Email" class="form-control rounded-pill border-dark"
-                       placeholder="john.doe@example.com" required />
-                <span asp-validation-for="Email" class="text-danger small"></span>
+            <div class="d-flex justify-content-center pt-5 mt-4">
+                <div class="login-logo-box shadow-sm">
+                    <img src="~/images/logo.png" alt="Au Delisse Logo" class="login-inner-logo">
+                </div>
             </div>
 
-            <div class="mb-4">
-                <label asp-for="Password" class="form-label fw-semibold">Password</label>
-                <input asp-for="Password" class="form-control rounded-pill border-dark" required />
-                <span asp-validation-for="Password" class="text-danger small"></span>
+            <img src="~/images/patterns.png" alt="Patterns" class="login-pattern-img w-100">
+        </div>
+
+        <div class="login-right p-4 p-md-5 d-flex flex-column justify-content-center bg-white">
+
+            <div class="text-center d-md-none mb-4">
+                <img src="~/images/logo.png" alt="Au Delisse Logo" class="login-mobile-logo">
             </div>
 
-            <button type="submit" class="btn w-100 fw-bold rounded-pill mb-3"
-                    style="background-color: #e8d44d;">
-                Connexion
-            </button>
+            <h2 class="login-title text-center fw-bold mb-1">Welcome Back !</h2>
+            <p class="text-center text-muted small mb-4">Sign in to pick up your fresh goodies</p>
 
-            <p class="text-center small text-muted">
-                Doesn't have an account ?
-                <a asp-action="SignUp" asp-controller="Home" class="fst-italic text-dark fw-bold">Sign Up</a>
-            </p>
-        </form>
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger small py-2 text-center rounded-pill">
+                    @ViewBag.ErrorMessage
+                </div>
+            }
 
+            <form method="post" asp-action="Connexion" asp-controller="Home">
+
+                <div class="mb-3">
+                    <input asp-for="Email" class="form-control login-input rounded-pill" placeholder="Email" required />
+                    <span asp-validation-for="Email" class="text-danger small px-3"></span>
+                </div>
+
+                <div class="mb-4">
+                    <input asp-for="Password" type="password" class="form-control login-input rounded-pill" placeholder="Password" required />
+                    <span asp-validation-for="Password" class="text-danger small px-3"></span>
+                </div>
+
+                <div class="mb-4 px-2">
+                    <div class="form-check custom-check d-flex align-items-center">
+                        <input type="checkbox" class="form-check-input rounded-circle border-0 shadow-sm" id="rememberMe">
+                        <label class="form-check-label small text-muted ms-2" for="rememberMe">Remember me</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login w-100 fw-bold rounded-pill mb-3">
+                    Login
+                </button>
+
+                <p class="text-center small text-muted mb-0">
+                    Don't have an account?
+                    <a asp-action="SignUp" asp-controller="Home" class="fst-italic text-teal fw-bold text-decoration-none">Sign Up</a>
+                </p>
+            </form>
+
+        </div>
     </div>
 </div>

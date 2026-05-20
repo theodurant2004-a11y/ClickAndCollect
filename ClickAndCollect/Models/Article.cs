@@ -10,6 +10,9 @@ namespace ClickAndCollect.Models
         private string description;
         private Category category;
 
+        public Article()
+        {
+        }
         public Article(int _idArticle, string _nameProduct, decimal _price, string _description, Category _category)
         {
             IDArticle = _idArticle;

@@ -3,15 +3,21 @@
     ViewData["Title"] = "Sign Up";
 }
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center">
-    <div class="rounded-4 shadow-lg p-5" style="width: 100%; max-width: 500px;">
+<div class="login-page-bg d-flex align-items-center justify-content-center min-vh-100 py-5">
 
+    <div class="bg-white rounded-4 shadow-lg p-4 p-md-5" style="width: 100%; max-width: 500px;">
+
+        <div class="text-center mb-4">
+            <img src="~/images/logo.png" alt="Au Delisse Logo" style="height: 70px;">
+        </div>
         <h3 class="fw-bold text-center mb-1">Create Account</h3>
         <p class="text-muted text-center small mb-4">Join us to order your fresh goodies</p>
 
         @if (TempData["Error"] != null)
         {
-            <p class="text-danger text-center small">@TempData["Error"]</p>
+            <div class="alert alert-danger small py-2 text-center rounded-pill">
+                @TempData["Error"]
+            </div>
         }
 
         <form method="post">
@@ -43,8 +49,7 @@
 
             <div class="mb-3 position-relative">
                 <label asp-for="RoadName" class="form-label fw-semibold"></label>
-                <input asp-for="RoadName" class="form-control rounded-pill border-dark"
-                       autocomplete="new-password" />
+                <input asp-for="RoadName" class="form-control rounded-pill border-dark" autocomplete="new-password" />
                 <span asp-validation-for="RoadName" class="text-danger small"></span>
             </div>
 
@@ -69,24 +74,23 @@
 
             <div class="mb-3">
                 <label asp-for="Password" class="form-label fw-semibold"></label>
-                <input asp-for="Password" class="form-control rounded-pill border-dark" />
+                <input asp-for="Password" type="password" class="form-control rounded-pill border-dark" />
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
             <div class="mb-4">
                 <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
-                <input asp-for="ConfirmPassword" class="form-control rounded-pill border-dark" />
+                <input asp-for="ConfirmPassword" type="password" class="form-control rounded-pill border-dark" />
                 <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
             </div>
 
-            <button type="submit" class="btn w-100 fw-bold rounded-pill mb-3"
-                    style="background-color: #e8d44d;">
+            <button type="submit" class="btn btn-login w-100 fw-bold rounded-pill mb-3 mt-2">
                 Sign Up
             </button>
 
-            <p class="text-center small text-muted">
+            <p class="text-center small text-muted mb-0">
                 Already have an account?
-                <a asp-action="Connexion" asp-controller="Home" class="fst-italic text-dark">Sign In</a>
+                <a asp-action="Connexion" asp-controller="Home" class="fst-italic text-teal fw-bold text-decoration-none">Sign In</a>
             </p>
 
         </form>
