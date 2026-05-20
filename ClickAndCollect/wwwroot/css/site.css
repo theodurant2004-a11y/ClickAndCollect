@@ -1,99 +1,171 @@
-html {
-    font-size: 14px;
-}
-
-@media (min-width: 768px) {
-    html {
-        font-size: 16px;
-    }
-}
-
-/* --- Form controls focus --- */
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-/* --- Layout --- */
-html {
-    position: relative;
-    min-height: 100%;
+html, body {
+    height: 100%;
+    margin: 0;
 }
 
 body {
-    margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
-/* --- Catalog --- */
-.filter-panel {
-    width: 25%;
-    min-width: 200px;
-    background-color: #eef4f7;
-    position: sticky;
-    top: 20px;
-    height: fit-content;
+.main-content-wrapper {
+    flex: 1 0 auto; 
 }
 
-.btn-filter {
-    background-color: #00bcd4;
-    color: white;
+.main-footer {
+    flex-shrink: 0;
+}
+/* VARIABLES DE CHARTE GRAPHIQUE */
+:root {
+    --primary-teal: #0D4C5B;
+    --secondary-yellow: #DFE154;
+    --text-dark: #203134;
+    --border-color: #CBD5E1;
+    --transition-fast: all 0.25s ease-in-out;
 }
 
-    .btn-filter:hover {
-        background-color: #00a0b5;
-        color: white;
-    }
-
-.toast-success {
-    background-color: green;
+/* NAVBAR DESIGN GLOBAL */
+.main-navbar {
+    padding: 1rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    background-color: #f4fafa !important;
 }
 
-/* --- Article card --- */
-.card-img-article {
+.navbar-container {
+    padding-left: 4vw !important;
+    padding-right: 4vw !important;
+}
+
+/* BLOC LOGO IMAGE + TEXTE */
+.logo-img {
+    height: clamp(45px, 6vw, 65px);
+    width: auto;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0.8rem;
+    line-height: 1.1;
+}
+
+.brand-title {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 700;
+    color: var(--primary-teal);
+    font-family: Arial, sans-serif;
+}
+
+.brand-subtitle {
+    font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* BARRE DE RECHERCHE */
+.search-container {
     width: 100%;
-    height: 200px;
-    object-fit: cover;
-    object-position: center;
-    background-color: #f8f9fa;
+    max-width: 450px;
+    margin: 0.8rem 0;
 }
 
-.btn-add-to-cart {
-    background-color: #00bcd4;
-    border-radius: 20px;
-    color: white;
+@media (min-width: 992px) {
+    .search-container {
+        margin: 0;
+    }
 }
 
-    .btn-add-to-cart:hover {
-        background-color: #00a0b5;
-        color: white;
+.search-group {
+    border: 2px solid var(--border-color);
+    border-radius: 50px !important;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    transition: var(--transition-fast);
+}
+
+.search-group:focus-within {
+    border-color: var(--primary-teal);
+}
+
+.search-icon-box {
+    background: transparent !important;
+    border: none !important;
+    color: var(--primary-teal);
+    padding-left: 1.2rem;
+}
+
+.search-input {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.6rem 1rem 0.6rem 0;
+    font-size: 0.95rem;
+}
+
+/* BOUTONS ACTIONS (MON COMPTE / PANIER) */
+.navbar-actions {
+    gap: 1.5rem;
+}
+
+@media (max-width: 991px) {
+    .navbar-actions {
+        justify-content: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #F1F5F9;
+    }
+}
+
+/* Buton "Compte" */
+.btn-account {
+    border: 2px solid var(--primary-teal) !important;
+    color: var(--primary-teal) !important;
+    font-weight: 700 !important;
+    border-radius: 50px !important;
+    padding: 0.5rem 1.4rem !important;
+    display: inline-flex;
+    align-items: center;
+    background-color: transparent;
+    transition: var(--transition-fast) !important;
+}
+
+.btn-account:hover {
+    background-color: var(--primary-teal) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-account.connected {
+background-color: #F0FDFA;
     }
 
-/* --- Forms --- */
-.form-container {
-    width: 100%;
-    max-width: 500px;
+/* Panier */
+.cart-wrapper {
+    color: var(--primary-teal);
+    display: inline-flex;
+    align-items: center;
+    transition: var(--transition-fast);
 }
 
-/* --- Profile --- */
-.profile-avatar {
-    width: 70px;
-    height: 70px;
-    background-color: #1a4a52;
+.cart-wrapper:hover {
+    transform: scale(1.05);
 }
 
-/* --- Shared buttons --- */
-.btn-primary-action {
-    background-color: #e8d44d;
+.cart-badge {
+    background-color: var(--secondary-yellow) !important;
+    color: #203134 !important;
+    font-weight: 800;
+    font-size: 0.75rem;
+    border: 1px solid #FFFFFF;
+    padding: 0.25em 0.5em;
 }
 
-    .btn-primary-action:hover {
-        background-color: #d4c040;
-    }
-
-.btn-teal {
-    background-color: #00bcd4;
+/* Toggler Menu Mobile */
+.custom-toggler {
+    border: none !important;
 }
 
-    .btn-teal:hover {
-        background-color: #00a0b5;
-        color: white;
-    }
+.custom-toggler:focus {
+    box-shadow: none !important;
+}
+/* 

@@ -1,4 +1,20 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@using System.Text.Json
+
+@{
+    int cartItemCount = 0;
+    string? jsonCart = Context.Session.GetString("Cart");
+
+    if (!string.IsNullOrEmpty(jsonCart))
+    {
+        var cartDict = JsonSerializer.Deserialize<Dictionary<int, int>>(jsonCart);
+        if (cartDict != null)
+        {
+            cartItemCount = cartDict.Values.Sum();
+        }
+    }
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,36 +25,92 @@
     <link rel="stylesheet" href="~/ClickAndCollect.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ClickAndCollect</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+    <header class="main-header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white main-navbar">
+            <div class="container-fluid navbar-container">
+
+                <a class="navbar-brand d-flex align-items-center brand-logo" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/log0.png" alt="Au Delisse Du Village" class="logo-img">
+                </a>
+
+                <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarClickAndCollect" aria-controls="navbarClickAndCollect" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+
+                <div class="collapse navbar-collapse" id="navbarClickAndCollect">
+
+                    <div class="search-container mx-auto">
+                        <div class="input-group search-group">
+                            <span class="input-group-text search-icon-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                </svg>
+                            </span>
+                            <input type="text" class="form-control search-input" placeholder="Search for fresh produce ...">
+                        </div>
+                    </div>
+
+                    <div class="navbar-actions d-flex align-items-center">
+
+                        @if (Context.Session.GetInt32("Id") != null)
+                        {
+                            <a asp-controller="Home" asp-action="Profile" class="btn btn-account connected">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-check-fill me-2" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M15.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L12.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z" />
+                                    <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+                                </svg>
+                                <span class="text-account">@Context.Session.GetString("FirstName")</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Home" asp-action="Connexion" class="btn btn-account">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-fill me-2" viewBox="0 0 16 16">
+                                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+                                </svg>
+                                <span class="text-account">My account</span>
+                            </a>
+                        }
+
+                        <a asp-controller="Home" asp-action="ShoppingCart" class="cart-wrapper position-relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-cart3" viewBox="0 0 16 16">
+                                <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l.84 4.479 9.144-.459L13.89 4zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+                            </svg>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill cart-badge">
+                                @cartItemCount
+                            </span>
+                        </a>
+
+                    </div>
                 </div>
+
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <div class="container-fluid px-0">
+        <main role="main" class="main-content-wrapper">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - ClickAndCollect - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="main-footer">
+        <div class="container-fluid px-0 h-100 d-flex align-items-center">
+
+            <div class="footer-left h-100">
+                <img src="~/images/decoration-nav.png" alt="Décoration" class="footer-pattern-img">
+            </div>
+
+            <div class="footer-middle flex-grow-1 d-flex justify-content-center">
+                <img src="~/images/abeille.png" alt="Abeille" class="footer-bee-img">
+            </div>
+
+            <div class="footer-links d-flex align-items-center">
+                <a asp-controller="Home" asp-action="Contact" class="footer-link">Contact</a>
+                <a asp-controller="Home" asp-action="Legal" class="footer-link">Legal Notice</a>
+                <a asp-controller="Home" asp-action="FAQ" class="footer-link">FAQ</a>
+            </div>
+
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
