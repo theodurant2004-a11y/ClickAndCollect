@@ -1,41 +1,94 @@
 ﻿using ClickAndCollect.DAL;
+using System.ComponentModel.DataAnnotations;
 
 namespace ClickAndCollect.Models
 {
     public class Store
     {
-        private int storeID;
-        private string? name;
-        private string? address;
-
-        public string Name
+		private string name;
+        private string roadName;
+        private string roadNumber;
+        private string city;
+        private string postalCode;
+        private int id;
+      
+        public int Id
         {
-            get { return name; } 
-            set { ArgumentNullException.ThrowIfNull(value); name = value; }
-        }
-        public string Address
-        {
-            get { return address; }
-            set { ArgumentNullException.ThrowIfNull(value); address = value; }
-        }
-        public int StoreID
-        {
-            get { return storeID; }
-            set
+            get { return id; }
+            init
             {
                 if (value <= 0)
-                    throw new ArgumentException("Store ID cannot be negative or zero.");
-                storeID = value;
+                    throw new ArgumentException("ID cannot be negative or zero.");
+                id = value;
             }
         }
-        public Store() { }
-        public Store(int _storeID, string _name, string _adresse)
+
+        public string Name
+		{
+			get { return name; }
+			set 
+			{
+				ArgumentNullException.ThrowIfNull(value);
+				name = value; 
+			}
+		}
+
+        public string RoadName
         {
-            StoreID = _storeID;
-            Name = _name;
-            Address = _adresse;
+            get { return roadName; }
+            set
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                roadName = value;
+            }
         }
-        public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL, Cashier cashier)
+
+        public string RoadNumber
+        {
+            get { return roadNumber; }
+            set
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                roadNumber = value;
+            }
+        }
+
+        public string City
+        {
+            get { return city; }
+            set
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                city = value;
+            }
+        }
+
+        public string PostalCode
+        {
+            get { return postalCode; }
+            set
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                postalCode = value;
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} - {RoadName} {RoadNumber}, {PostalCode} {City}";
+        }
+
+        public static async Task<List<Store>> GetStoresAsync(IStoreDAL _storeDAL)
+        {
+            return await _storeDAL.GetStoresAsync();
+        }
+
+        public static async Task<List<TimeSlot>> GetAvailableTimeSlotsAsync(IStoreDAL _storeDAL, Store _store)
+        {
+            return await _storeDAL.GetAvailableTimeSlotsAsync(_store);
+        }
+      
+      public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL, Cashier cashier)
         {
             return await storeDAL.GetTodaysOrdersAsync(cashier);
         }

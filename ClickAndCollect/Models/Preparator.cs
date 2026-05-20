@@ -26,7 +26,7 @@ namespace ClickAndCollect.Models
 
             preparator.preparatorStore = new Store
             {
-                StoreID = preparator.StoreID
+                Id = preparator.StoreID
             };
 
             return preparator;

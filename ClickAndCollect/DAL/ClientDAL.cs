@@ -115,7 +115,7 @@ namespace ClickAndCollect.DAL
             return id;
         }
 
-        public async Task<int> UpdateClientInfo(int? _id, Client _client)
+        public async Task<int> UpdateClientInfo(Client _client)
         {
             int rowsAffected = 0;
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -151,7 +151,7 @@ namespace ClickAndCollect.DAL
                       WHERE personID = @PersonID;"
                     , con);
 
-                cmd.Parameters.AddWithValue("@PersonID", _id);
+                cmd.Parameters.AddWithValue("@PersonID", _client.Id);
                 cmd.Parameters.AddWithValue("@FirstName", _client.FirstName);
                 cmd.Parameters.AddWithValue("@LastName", _client.SurName);
                 cmd.Parameters.AddWithValue("@PhoneNumber", _client.Phone);

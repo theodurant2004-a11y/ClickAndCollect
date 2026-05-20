@@ -5,6 +5,20 @@
         private DateTime date;
         private DateTime startingHour;
         private DateTime endingHour;
+        private int id;
+
+        public bool IsFull { get; set; } = false;
+
+        public int Id
+        {
+            get { return id; }
+            init
+            {
+                if (value < 0)
+                    throw new ArgumentException("ID cannot be negative or zero.");
+                id = value;
+            }
+        }
 
         public DateTime Date
         {
@@ -48,6 +62,11 @@
             Date = _date;
             StartingHour = _startingHour;
             EndingHour = _endingHour;
+        }
+
+        public override string ToString()
+        {
+            return $"{Date:dd/MM/yyyy} {StartingHour:HH:mm} - {EndingHour:HH:mm}";
         }
     }
 }

@@ -19,8 +19,14 @@ namespace ClickAndCollect.DAL
         {
             List<Article> articles = new List<Article>();
 
-            string query = "SELECT a.articleID, a.name, a.price, a.description, c.name AS categoryName " +
-                           "FROM Article a JOIN Category c ON a.categoryID = c.categoryID";
+            string query = @"SELECT a.articleID, 
+                                a.name, 
+                                a.price, 
+                                a.description, 
+                                COALESCE(a.imagePath, 'none') AS imagePath,
+                                c.name AS categoryName
+                           FROM Article a 
+                           JOIN Category c ON a.categoryID = c.categoryID";
 
             if (ids != null && ids.Count > 0)
                 query += $" WHERE a.articleID IN ({string.Join(",", ids)})";
@@ -37,8 +43,9 @@ namespace ClickAndCollect.DAL
                         string name = reader.GetString("name");
                         decimal price = reader.GetDecimal("price");
                         string description = reader.GetString("description");
+                        string imagePath = reader.GetString("imagePath");
                         string categoryName = reader.GetString("categoryName");
-                        articles.Add(new Article(id, name, price, description, new Category(categoryName)));
+                        articles.Add(new Article(id, name, price, description, new Category(categoryName), imagePath));
                     }
                 }
             }

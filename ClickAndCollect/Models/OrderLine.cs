@@ -35,9 +35,10 @@
             {
                 if (value <= 0 && parentOrder != null)
                     ParentOrder.RemoveOrderLine(this);
-                quantity = value;
-            }
-        }
+				else
+					quantity = value;
+			}
+		}
 
         public OrderLine()
         {
@@ -54,5 +55,10 @@
         {
             return Quantity * Article_.Price;
         }
-    }
+
+		public override string ToString()
+		{
+			return $"Article : {Article_}, Quantity : {Quantity}";
+		}
+	}
 }

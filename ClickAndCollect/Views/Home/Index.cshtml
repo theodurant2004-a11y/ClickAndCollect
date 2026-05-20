@@ -1,7 +1,7 @@
 ﻿@model List<Article>
 @{
     ViewData["Title"] = "Catalog";
-    List<string> categories = ViewBag.Categories as List<string> ?? new List<string>();
+    List<Category> categories = ViewBag.Categories as List<Category>;
     string? selectedCategory = Context.Request.Query["category"];
     selectedCategory = string.IsNullOrEmpty(selectedCategory) ? null : selectedCategory;
 }

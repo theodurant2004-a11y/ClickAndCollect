@@ -1,1 +1,153 @@
-﻿coucou
+﻿@model Order
+@{
+    ViewData["Title"] = "Checkout";
+    List<Store> stores = ViewBag.Stores as List<Store>;
+    List<TimeSlot> timeSlots = ViewBag.TimeSlots as List<TimeSlot>;
+    List<DateTime> availableDates = ViewBag.AvailableDates as List<DateTime>;
+    int? selectedStoreId = ViewBag.SelectedStoreId;
+    string selectedTimeSlotInfo = ViewBag.SelectedTimeSlotInfo as string;
+    string selectedDate = ViewBag.SelectedDate as string;
+}
+
+<h1 class="mb-4">Checkout</h1>
+
+<div class="row">
+    <div class="col-md-8">
+
+        <div class="card border-0 shadow-sm rounded-4 mb-3 p-4">
+            <h5 class="fw-bold mb-3">1. Choose a store</h5>
+            <form asp-action="Checkout" asp-controller="Home" method="get">
+                @foreach (Store store in stores)
+                {
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="storeId"
+                               value="@store.Id" id="store_@store.Id"
+                               @(selectedStoreId == store.Id ? "checked" : "") />
+                        <label class="form-check-label" for="store_@store.Id">
+                            <span class="fw-semibold">@store.Name</span>
+                            <span class="text-muted small ms-2">@store.RoadName @store.RoadNumber, @store.PostalCode @store.City</span>
+                        </label>
+                    </div>
+                }
+                <button type="submit" class="btn text-white rounded-pill mt-3 px-4 btn-teal">
+                    Confirm store
+                </button>
+            </form>
+        </div>
+
+        @if (selectedStoreId != null && availableDates != null)
+        {
+            <div class="card border-0 shadow-sm rounded-4 mb-3 p-4">
+                <h5 class="fw-bold mb-3">2. Choose a date</h5>
+                <form asp-action="Checkout" asp-controller="Home" method="get">
+                    <input type="hidden" name="storeId" value="@selectedStoreId" />
+                    @foreach (DateTime date in availableDates)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="selectedDate"
+                                   value="@date.ToString("yyyy-MM-dd")" id="date_@date.ToString("yyyyMMdd")"
+                                   @(selectedDate == date.ToString("yyyy-MM-dd") ? "checked" : "") />
+                            <label class="form-check-label fw-semibold" for="date_@date.ToString("yyyyMMdd")">
+                                @date.ToString("dddd dd/MM/yyyy")
+                            </label>
+                        </div>
+                    }
+                    <button type="submit" class="btn text-white rounded-pill mt-3 px-4 btn-teal">
+                        Confirm date
+                    </button>
+                </form>
+            </div>
+        }
+
+        @if (selectedStoreId != null && selectedDate != null && timeSlots != null)
+        {
+            List<TimeSlot> slotsForDate = new List<TimeSlot>();
+            foreach (TimeSlot slot in timeSlots)
+            {
+                if (slot.Date.ToString("yyyy-MM-dd") == selectedDate)
+                    slotsForDate.Add(slot);
+            }
+
+            <div class="card border-0 shadow-sm rounded-4 mb-3 p-4">
+                <h5 class="fw-bold mb-3">3. Choose a time slot</h5>
+                @if (!slotsForDate.Any())
+                {
+                    <p class="text-muted">No available time slots for this date.</p>
+                }
+                else
+                {
+                    <form asp-action="Checkout" asp-controller="Home" method="get">
+                        <input type="hidden" name="storeId" value="@selectedStoreId" />
+                        <input type="hidden" name="selectedDate" value="@selectedDate" />
+                        @foreach (TimeSlot slot in slotsForDate)
+                        {
+                            string slotInfo = slot.Id + "|" + slot.StartingHour.ToString("HH:mm") + "|" + slot.EndingHour.ToString("HH:mm");
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="timeSlotInfo"
+                                       value="@slotInfo"
+                                       id="slot_@slot.StartingHour.Hour"
+                                       @(selectedTimeSlotInfo == slotInfo ? "checked" : "")
+                                       @(slot.IsFull ? "disabled" : "") />
+                                <label class="form-check-label @(slot.IsFull ? "text-muted" : "")"
+                                       for="slot_@slot.StartingHour.Hour">
+                                    @slot.StartingHour.ToString("HH:mm") - @slot.EndingHour.ToString("HH:mm")
+                                    @if (slot.IsFull)
+                                    {
+                                        <span class="badge bg-danger ms-2 small">Full</span>
+                                    }
+                                </label>
+                            </div>
+                        }
+                        <button type="submit" class="btn text-white rounded-pill mt-3 px-4 btn-teal">
+                            Confirm time slot
+                        </button>
+                    </form>
+                }
+            </div>
+        }
+
+        @if (selectedStoreId != null && selectedDate != null && selectedTimeSlotInfo != null)
+        {
+            <div class="card border-0 shadow-sm rounded-4 mb-3 p-4">
+                <h5 class="fw-bold mb-3">4. Confirm your order</h5>
+                <form asp-action="PlaceOrder" asp-controller="Home" method="post">
+                    <input type="hidden" name="storeId" value="@selectedStoreId" />
+                    <input type="hidden" name="timeSlotInfo" value="@selectedTimeSlotInfo" />
+                    <input type="hidden" name="selectedDate" value="@selectedDate" />
+                    <button type="submit" class="btn fw-bold rounded-pill px-4 btn-primary-action">
+                        Place order
+                    </button>
+                </form>
+            </div>
+        }
+
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h5 class="fw-bold mb-3">Order Summary</h5>
+            @foreach (OrderLine line in Model.OrderLines)
+            {
+                <div class="d-flex justify-content-between mb-2">
+                    <span>@line.Article_.NameProduct x @line.Quantity</span>
+                    <span>€@line.GetPriceLine().ToString("0.00")</span>
+                </div>
+            }
+            <hr />
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Service charge</span>
+                <span>€5.95</span>
+            </div>
+            <hr />
+            <div class="d-flex justify-content-between fw-bold fs-5">
+                <span>Total</span>
+                <span>€@((Model.GetTotalPrice() + 5.95m ).ToString("0.00"))</span>
+            </div>
+            <a asp-action="ShoppingCart" asp-controller="Home"
+               class="btn btn-outline-secondary w-100 rounded-pill mt-2">
+                Back to cart
+            </a>
+        </div>
+    </div>
+
+</div>
