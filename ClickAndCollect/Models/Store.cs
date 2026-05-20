@@ -5,13 +5,13 @@ namespace ClickAndCollect.Models
 {
     public class Store
     {
-		private string name;
+        private string name;
         private string roadName;
         private string roadNumber;
         private string city;
         private string postalCode;
         private int id;
-      
+
         public int Id
         {
             get { return id; }
@@ -24,14 +24,14 @@ namespace ClickAndCollect.Models
         }
 
         public string Name
-		{
-			get { return name; }
-			set 
-			{
-				ArgumentNullException.ThrowIfNull(value);
-				name = value; 
-			}
-		}
+        {
+            get { return name; }
+            set
+            {
+                ArgumentNullException.ThrowIfNull(value);
+                name = value;
+            }
+        }
 
         public string RoadName
         {
@@ -87,8 +87,8 @@ namespace ClickAndCollect.Models
         {
             return await _storeDAL.GetAvailableTimeSlotsAsync(_store);
         }
-      
-      public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL, Cashier cashier)
+
+        public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL, Cashier cashier)
         {
             return await storeDAL.GetTodaysOrdersAsync(cashier);
         }

@@ -9,10 +9,10 @@ namespace ClickAndCollect.Models
 
         private int orderID;
         private int boxUsed;
-		private int boxReturned;
+        private int boxReturned;
         private string status;
         private decimal serviceCharge;
-		List<OrderLine> orderLines;
+        List<OrderLine> orderLines;
 
         public int OrderID
         {
@@ -79,19 +79,17 @@ namespace ClickAndCollect.Models
             orderLines = new List<OrderLine>();
         }
 
-		public void AddArticle(Article _article, int _quantity)
-		{
-            //if article already exists in the order, update the quantity
+        public void AddArticle(Article _article, int _quantity)
+        {
             OrderLine existingLine = null;
             for (int i = 0; i < orderLines.Count && existingLine == null; i++)
             {
                 if (orderLines[i].Article_ == _article)
                     existingLine = orderLines[i];
             }
-			if(existingLine != null)
-				existingLine.Quantity += _quantity;
+            if (existingLine != null)
+                existingLine.Quantity += _quantity;
             else
-                //create a new order line with article and quantity
                 orderLines.Add(new OrderLine(_quantity, _article, this));
         }
 
@@ -106,18 +104,23 @@ namespace ClickAndCollect.Models
 
         public void RemoveOrderLine(OrderLine _line)
         {
-            //TODO : Dispose of the orderline
             orderLines.Remove(_line);
         }
 
+        public decimal GetArticlesTotal()
+        {
+            decimal total = 0;
+            foreach (OrderLine line in orderLines)
+                total += line.GetPriceLine();
+            return total;
+        }
+
+        // Total = articles + 5.95 service charge + (boxUsed x 5.95) - (boxReturned x 5.95)
         public decimal GetTotalPrice()
         {
-            decimal totalPrice = 0;
-            foreach (OrderLine line in orderLines)
-            {
-                totalPrice += line.GetPriceLine();
-            }
-            return totalPrice;
+            decimal boxDeposit = BoxUsed * 5.95m;
+            decimal boxRefund = BoxReturned * 5.95m;
+            return GetArticlesTotal() + ServiceCharge + boxDeposit - boxRefund;
         }
 
         public void FlushOrder()
@@ -125,9 +128,45 @@ namespace ClickAndCollect.Models
             orderLines.Clear();
         }
 
+        // Static: place a new order
         public static async Task<int> PlaceOrderAsync(IOrderDAL _orderDAL, Client _client, Store _store, TimeSlot _timeSlot, Dictionary<int, int> _cart)
         {
             return await _orderDAL.PlaceOrderAsync(_client, _store, _timeSlot, _cart);
+        }
+
+        // Static: get a full order by ID (with OrderLines + Articles)
+        public static async Task<Order> GetOrderByIdAsync(IOrderDAL _orderDAL, int _orderId)
+        {
+            return await _orderDAL.GetOrderByIdAsync(_orderId);
+        }
+
+        // Instance: finalize an order (Cashier) — status Delivered
+        public async Task<int> FinalizeOrderAsync(IOrderDAL _orderDAL, int _boxUsed, int _boxReturned)
+        {
+            if (_boxUsed < 0)
+                throw new ArgumentException("BoxUsed cannot be negative.");
+            if (_boxReturned < 0)
+                throw new ArgumentException("BoxReturned cannot be negative.");
+
+            BoxUsed = _boxUsed;
+            BoxReturned = _boxReturned;
+            Status = "Delivered";
+
+            return await _orderDAL.FinalizeOrderAsync(this);
+        }
+
+        // Instance: prepare an order (Preparator) — status InPreparation or Prepared
+        public async Task<int> PrepareOrderAsync(IOrderDAL _orderDAL, int _boxUsed, string _status)
+        {
+            if (_boxUsed < 0)
+                throw new ArgumentException("BoxUsed cannot be negative.");
+            if (_status != "InPreparation" && _status != "Prepared")
+                throw new ArgumentException("Status must be InPreparation or Prepared.");
+
+            BoxUsed = _boxUsed;
+            Status = _status;
+
+            return await _orderDAL.PrepareOrderAsync(this);
         }
     }
 }

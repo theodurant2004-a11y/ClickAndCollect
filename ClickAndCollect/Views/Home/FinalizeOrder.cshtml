@@ -1,20 +1,29 @@
 ﻿@model ClickAndCollect.Models.Order
 
 @{
-    ViewData["Title"] = "Finalisation de la Commande";
+    ViewData["Title"] = "Finalize Order";
+    decimal boxDeposit = Model.BoxUsed * 5.95m;
+    decimal boxRefund = Model.BoxReturned * 5.95m;
 }
 
 <div class="container mt-4">
-    <h2>Détails de la Commande N° @Model.OrderID</h2>
-    <p><strong>Client :</strong> @Model.Client.FirstName @Model.Client.SurName</p>
+    <h2>Order Details N° @Model.OrderID</h2>
+    <p><strong>Client:</strong> @Model.Client.FirstName @Model.Client.SurName</p>
     <hr />
 
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
     <div class="row">
-        <div class="col-md-8">
-            <h4>Articles commandés</h4>
+
+        <!-- Article list -->
+        <div class="col-md-7">
+            <h4>Ordered Articles</h4>
             @if (Model.OrderLines == null || Model.OrderLines.Count == 0)
             {
-                <div class="alert alert-warning">Cette commande ne contient plus aucun article.</div>
+                <div class="alert alert-warning">This order contains no articles.</div>
             }
             else
             {
@@ -22,8 +31,9 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Article</th>
-                            <th>Prix Unitaire</th>
-                            <th class="text-center">Quantité</th>
+                            <th>Unit Price</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-center">Subtotal</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -34,12 +44,14 @@
                                 <td>@line.Article_.NameProduct</td>
                                 <td>@line.Article_.Price.ToString("F2") €</td>
                                 <td class="text-center"><strong>@line.Quantity</strong></td>
+                                <td class="text-center">@line.GetPriceLine().ToString("F2") €</td>
                                 <td class="text-center">
                                     <form asp-action="RemoveItemFromOrder" method="post" style="display:inline;">
                                         @Html.AntiForgeryToken()
-                                        <input type="hidden" name="itemId" value="@line.Article_.IDArticle" />
-                                        <button type="submit" class="btn btn-danger btn-sm" title="Retirer 1 exemplaire">
-                                            <i class="bi bi-trash"></i> Retirer 1
+                                        <input type="hidden" name="orderId" value="@Model.OrderID" />
+                                        <input type="hidden" name="articleId" value="@line.Article_.IDArticle" />
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash"></i> Remove 1
                                         </button>
                                     </form>
                                 </td>
@@ -50,44 +62,78 @@
             }
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-5">
+
+            <!-- Box management -->
             <div class="card mb-3">
-                <div class="card-header bg-primary text-white">Gestion des Boîtes Retournées</div>
+                <div class="card-header bg-primary text-white">Box Management</div>
                 <div class="card-body">
-                    <form asp-action="ManageBoxReturn" method="post">
+                    <form asp-action="UpdateBoxes" method="post">
                         @Html.AntiForgeryToken()
-                        <p><small>Boîtes fournies au client : @Model.BoxUsed</small></p>
+                        <input type="hidden" name="orderId" value="@Model.OrderID" />
                         <div class="mb-3">
-                            <label class="form-label">Nombre de boîtes ramenées :</label>
-                            <input type="number" name="returnedBoxes" value="@Model.BoxReturned" class="form-control" min="0" required />
-                        <button type="submit" class="btn btn-primary w-100">Mettre à jour les boîtes</button>
+                            <label class="form-label">Boxes given to client:</label>
+                            <input type="number" name="boxUsed" value="@Model.BoxUsed"
+                                   class="form-control" min="0" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Boxes returned by client:</label>
+                            <input type="number" name="boxReturned" value="@Model.BoxReturned"
+                                   class="form-control" min="0" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Update Boxes</button>
                     </form>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header bg-dark text-white">Résumé du Paiement</div>
+            <!-- Payment summary -->
+            <div class="card mb-3">
+                <div class="card-header bg-dark text-white">Payment Summary</div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Frais de service :</span>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Articles:</span>
+                        <span>@Model.GetArticlesTotal().ToString("F2") €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Service charge:</span>
                         <span>@Model.ServiceCharge.ToString("F2") €</span>
                     </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Box deposit (@Model.BoxUsed × 5.95 €):</span>
+                        <span>+ @boxDeposit.ToString("F2") €</span>
+                    </div>
+                    @if (Model.BoxReturned > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-1 text-success">
+                            <span>Box refund (@Model.BoxReturned × 5.95 €):</span>
+                            <span>- @boxRefund.ToString("F2") €</span>
+                        </div>
+                    }
                     <hr />
                     <div class="d-flex justify-content-between">
-                        <strong>Total à payer :</strong>
+                        <strong>Total to pay:</strong>
                         <strong class="text-success fs-5">@Model.GetTotalPrice().ToString("F2") €</strong>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <!-- Actions -->
+            <div class="d-flex gap-2">
                 <form asp-action="CancelFinalizeOrder" method="post" class="w-50">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-secondary w-100">Annuler / Retour</button>
+                    <input type="hidden" name="orderId" value="@Model.OrderID" />
+                    <button type="submit" class="btn btn-secondary w-100">Cancel</button>
                 </form>
 
-                <a asp-action="IndexCashier" class="btn btn-success w-50">Valider & Délivrer</a>
+                <form asp-action="CloseFinalizeOrder" method="post" class="w-50">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="orderId" value="@Model.OrderID" />
+                    <input type="hidden" name="boxUsed" value="@Model.BoxUsed" />
+                    <input type="hidden" name="boxReturned" value="@Model.BoxReturned" />
+                    <button type="submit" class="btn btn-success w-100">Validate & Deliver</button>
+                </form>
             </div>
+
         </div>
     </div>
 </div>

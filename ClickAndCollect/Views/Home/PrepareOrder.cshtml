@@ -1,0 +1,80 @@
+﻿@model ClickAndCollect.Models.Order
+
+@{
+    ViewData["Title"] = "Prepare Order";
+}
+
+<div class="container mt-4">
+    <h2>Prepare Order N° @Model.OrderID</h2>
+    <p><strong>Client:</strong> @Model.Client.FirstName @Model.Client.SurName</p>
+    <p><strong>Time slot:</strong> @Model.TimeSlot.StartingHour.ToString("HH:mm") - @Model.TimeSlot.EndingHour.ToString("HH:mm")</p>
+    <hr />
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row">
+
+        <!-- Article list -->
+        <div class="col-md-8">
+            <h4>Articles to prepare</h4>
+            @if (Model.OrderLines == null || Model.OrderLines.Count == 0)
+            {
+                <div class="alert alert-warning">This order contains no articles.</div>
+            }
+            else
+            {
+                <table class="table table-bordered align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Article</th>
+                            <th>Category</th>
+                            <th class="text-center">Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in Model.OrderLines)
+                        {
+                            <tr>
+                                <td>@line.Article_.NameProduct</td>
+                                <td>@line.Article_.Category.Name</td>
+                                <td class="text-center"><strong>@line.Quantity</strong></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        <!-- Box count + actions -->
+        <div class="col-md-4">
+
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">Specify Number of Boxes</div>
+                <div class="card-body">
+                    <form asp-action="ClosePrepareOrder" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.OrderID" />
+                        <div class="mb-3">
+                            <label class="form-label">Number of boxes used:</label>
+                            <input type="number" name="boxUsed" value="@Model.BoxUsed"
+                                   class="form-control" min="1" required />
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            Mark as Prepared
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <form asp-action="CancelPrepareOrder" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="orderId" value="@Model.OrderID" />
+                <button type="submit" class="btn btn-secondary w-100">Cancel / Back</button>
+            </form>
+
+        </div>
+    </div>
+</div>

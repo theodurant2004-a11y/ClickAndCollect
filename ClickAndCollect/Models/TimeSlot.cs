@@ -15,7 +15,7 @@
             init
             {
                 if (value < 0)
-                    throw new ArgumentException("ID cannot be negative or zero.");
+                    throw new ArgumentException("ID cannot be negative.");
                 id = value;
             }
         }
@@ -23,34 +23,19 @@
         public DateTime Date
         {
             get { return date; }
-            set
-            {
-                if (value < DateTime.Today)
-                    throw new ArgumentException("Date cannot be in the past.");
-                date = value;
-            }
+            set { date = value; }
         }
 
         public DateTime StartingHour
         {
             get { return startingHour; }
-            set
-            {
-                if (value < DateTime.Today)
-                    throw new ArgumentException("Starting hour cannot be in the past.");
-                startingHour = value;
-            }
+            set { startingHour = value; }
         }
 
         public DateTime EndingHour
         {
             get { return endingHour; }
-            set
-            {
-                if (value < DateTime.Today)
-                    throw new ArgumentException("Ending hour cannot be in the past.");
-                endingHour = value;
-            }
+            set { endingHour = value; }
         }
 
         public TimeSlot()
@@ -62,6 +47,13 @@
             Date = _date;
             StartingHour = _startingHour;
             EndingHour = _endingHour;
+        }
+
+        public bool IsValidForBooking()
+        {
+            return Date.Date >= DateTime.Today
+                && StartingHour >= DateTime.Now
+                && EndingHour > StartingHour;
         }
 
         public override string ToString()
