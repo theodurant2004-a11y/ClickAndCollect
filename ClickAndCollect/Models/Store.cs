@@ -93,7 +93,7 @@ namespace ClickAndCollect.Models
             return await storeDAL.GetTodaysOrdersAsync(cashier);
         }
 
-        public async Task<List<Order>> GetOrderToPrepareAsync(IStoreDAL storeDAL, Preparator preparator)
+        public static async Task<List<Order>> GetOrderToPrepareAsync(IStoreDAL storeDAL, Preparator preparator)
         {
             return await storeDAL.GetOrderToPrepareAsync(preparator);
         }

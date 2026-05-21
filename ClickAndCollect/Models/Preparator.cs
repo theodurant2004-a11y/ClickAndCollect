@@ -31,7 +31,7 @@ namespace ClickAndCollect.Models
 
         public static async Task<List<Order>> GetOrderToPrepareAsync(IStoreDAL storeDAL, Preparator preparator)
         {
-            return await storeDAL.GetOrderToPrepareAsync(preparator);
+            return await Store.GetOrderToPrepareAsync(storeDAL, preparator);
         }
     }
 }

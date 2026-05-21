@@ -170,7 +170,7 @@ namespace ClickAndCollect.Controllers
                     ModelState.AddModelError("Email", "This email is already in use.");
                     return View(user);
                 }
-                int clientId = await user.AddClientAsync(clientDAL, user);
+                int clientId = await Client.AddClientAsync(clientDAL, user);
                 if (clientId == -1)
                 {
                     ModelState.AddModelError("", "An error occurred while creating your account.");
@@ -273,7 +273,7 @@ namespace ClickAndCollect.Controllers
                 Cashier currentCashier = await Cashier.GetCashierAsync(cashierID, storeId, employeeDAL);
                 currentCashier.FirstName = firstName;
 
-                List<Order> todaysOrders = await currentCashier.GetTodaysOrdersAsync(storeDAL);
+                List<Order> todaysOrders = await Cashier.GetTodaysOrdersAsync(storeDAL, currentCashier);
 
                 if (todaysOrders == null || todaysOrders.Count == 0)
                 {
@@ -308,7 +308,7 @@ namespace ClickAndCollect.Controllers
                 }
 
                 if (order.Status != "Delivered")
-                    await order.ChangeStatusAsync(orderDAL, "Delivering");
+                    await Order.ChangeStatusAsync(orderDAL, "Delivering", order);
 
                 return View(order);
             }
@@ -339,7 +339,7 @@ namespace ClickAndCollect.Controllers
                     return RedirectToAction("IndexCashier");
                 }
 
-                int rows = await order.FinalizeOrderAsync(orderDAL, boxUsed, boxReturned);
+                int rows = await Order.FinalizeOrderAsync(orderDAL, boxUsed, boxReturned, order);
 
                 if (rows == 0)
                     TempData["Error"] = "An error occurred while closing the order.";
@@ -439,7 +439,7 @@ namespace ClickAndCollect.Controllers
                 {
                     return View(user);
                 }
-                int rows = await clientDAL.UpdateClientInfo(user);
+                int rows = await Client.UpdateClientInfo(clientDAL, user);
 
                 if (rows == 0)
                 {
@@ -629,7 +629,7 @@ namespace ClickAndCollect.Controllers
                     TempData["Error"] = "Order not found.";
                     return RedirectToAction("IndexCashier");
                 }
-                await order.UpdateBoxesAsync(orderDAL, boxUsed, boxReturned);
+                await Order.UpdateBoxesAsync(orderDAL, boxUsed, boxReturned, order);
                 return RedirectToAction("FinalizeOrder", new { orderId = orderId });
             }
             catch (Exception ex)
@@ -649,7 +649,7 @@ namespace ClickAndCollect.Controllers
             {
                 Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
                 if (order != null)
-                    await order.ChangeStatusAsync(orderDAL, "Prepared");
+                    await Order.ChangeStatusAsync(orderDAL, "Prepared", order);
                 return RedirectToAction("IndexCashier");
             }
             catch (Exception ex)
@@ -676,7 +676,7 @@ namespace ClickAndCollect.Controllers
                 }
 
                 if (order.Status == "Ordered")
-                    await order.PrepareOrderAsync(orderDAL, 0, "InPreparation");
+                    await Order.PrepareOrderAsync(orderDAL, 0, "InPreparation", order);
 
                 return View(order);
             }
@@ -705,7 +705,7 @@ namespace ClickAndCollect.Controllers
                     return RedirectToAction("IndexPreparator");
                 }
 
-                int rows = await order.PrepareOrderAsync(orderDAL, boxUsed, "Prepared");
+                int rows = await Order.PrepareOrderAsync(orderDAL, boxUsed, "Prepared", order);
 
                 if (rows == 0)
                     TempData["Error"] = "An error occurred while marking the order as prepared.";
@@ -731,7 +731,7 @@ namespace ClickAndCollect.Controllers
             {
                 Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
                 if (order != null)
-                    await order.PrepareOrderAsync(orderDAL, 0, "Ordered");
+                    await Order.PrepareOrderAsync(orderDAL, 0, "Ordered", order);
                 return RedirectToAction("IndexPreparator");
             }
             catch (Exception ex)

@@ -138,54 +138,54 @@ namespace ClickAndCollect.Models
             return await _orderDAL.GetOrderByIdAsync(_orderId);
         }
 
-        public async Task<int> FinalizeOrderAsync(IOrderDAL _orderDAL, int _boxUsed, int _boxReturned)
+        public static async Task<int> FinalizeOrderAsync(IOrderDAL _orderDAL, int _boxUsed, int _boxReturned, Order _order)
         {
             if (_boxUsed < 0)
                 throw new ArgumentException("BoxUsed cannot be negative.");
             if (_boxReturned < 0)
                 throw new ArgumentException("BoxReturned cannot be negative.");
 
-            BoxUsed = _boxUsed;
-            BoxReturned = _boxReturned;
-            Status = "Delivered";
+            _order.BoxUsed = _boxUsed;
+            _order.BoxReturned = _boxReturned;
+            _order.Status = "Delivered";
 
-            return await _orderDAL.FinalizeOrderAsync(this);
+            return await _orderDAL.FinalizeOrderAsync(_order);
         }
 
-        public async Task<int> UpdateBoxesAsync(IOrderDAL _orderDAL, int _boxUsed, int _boxReturned)
+        public static async Task<int> UpdateBoxesAsync(IOrderDAL _orderDAL, int _boxUsed, int _boxReturned, Order _order)
         {
             if (_boxUsed < 0)
                 throw new ArgumentException("BoxUsed cannot be negative.");
             if (_boxReturned < 0)
                 throw new ArgumentException("BoxReturned cannot be negative.");
 
-            BoxUsed = _boxUsed;
-            BoxReturned = _boxReturned;
+            _order.BoxUsed = _boxUsed;
+            _order.BoxReturned = _boxReturned;
 
-            return await _orderDAL.FinalizeOrderAsync(this);
+            return await _orderDAL.FinalizeOrderAsync(_order);
         }
 
-        public async Task<int> ChangeStatusAsync(IOrderDAL _orderDAL, string _status)
+        public static async Task<int> ChangeStatusAsync(IOrderDAL _orderDAL, string _status, Order _order)
         {
             if (string.IsNullOrWhiteSpace(_status))
                 throw new ArgumentException("Status cannot be empty.");
 
-            Status = _status;
+            _order.Status = _status;
 
-            return await _orderDAL.FinalizeOrderAsync(this);
+            return await _orderDAL.FinalizeOrderAsync(_order);
         }
 
-        public async Task<int> PrepareOrderAsync(IOrderDAL _orderDAL, int _boxUsed, string _status)
+        public static async Task<int> PrepareOrderAsync(IOrderDAL _orderDAL, int _boxUsed, string _status, Order _order)
         {
             if (_boxUsed < 0)
                 throw new ArgumentException("BoxUsed cannot be negative.");
             if (_status != "InPreparation" && _status != "Prepared" && _status != "Ordered")
                 throw new ArgumentException("Invalid status for preparation.");
 
-            BoxUsed = _boxUsed;
-            Status = _status;
+            _order.BoxUsed = _boxUsed;
+            _order.Status = _status;
 
-            return await _orderDAL.PrepareOrderAsync(this);
+            return await _orderDAL.PrepareOrderAsync(_order);
         }
     }
 }
