@@ -29,15 +29,6 @@ namespace ClickAndCollect.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("Type") == "Cashier")
-                {
-                    return RedirectToAction("IndexCashier");
-                }
-                if (HttpContext.Session.GetString("Type") == "Preparator")
-                {
-                    return RedirectToAction("IndexPreparator");
-                }
-
                 List<Article> articles = await Article.GetAllArticlesAsync(articleDAL);
                 List<Category> categories = await Category.GetCategoriesAsync(categoryDAL);
 
@@ -174,13 +165,11 @@ namespace ClickAndCollect.Controllers
                 {
                     return View(user);
                 }
-                //verify if user is in DB
                 if (await Client.GetClientByEmail(clientDAL, user.Email) != null)
                 {
                     ModelState.AddModelError("Email", "This email is already in use.");
                     return View(user);
                 }
-                // add user in DB and add to session
                 int clientId = await user.AddClientAsync(clientDAL, user);
                 if (clientId == -1)
                 {
@@ -206,9 +195,7 @@ namespace ClickAndCollect.Controllers
         {
             return View();
         }
-
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Connexion(Client loginInfo)
         {
             var client = await clientDAL.GetClientByEmail(loginInfo.Email);
@@ -302,7 +289,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-        // GET : affiche les détails de la commande (articles, prix, boîtes)
         public async Task<IActionResult> FinalizeOrder(int orderId)
         {
             if (HttpContext.Session.GetString("Type") != "Cashier")
@@ -321,12 +307,8 @@ namespace ClickAndCollect.Controllers
                     return RedirectToAction("IndexCashier");
                 }
 
-                // Passer en "Delivering" dès que le cashier ouvre la commande
                 if (order.Status != "Delivered")
-                {
-                    order.Status = "Delivering";
-                    await orderDAL.FinalizeOrderAsync(order);
-                }
+                    await order.ChangeStatusAsync(orderDAL, "Delivering");
 
                 return View(order);
             }
@@ -337,7 +319,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-        // POST : clôture définitive de la commande (status Delivered + boîtes)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CloseFinalizeOrder(int orderId, int boxUsed, int boxReturned)
@@ -385,7 +366,6 @@ namespace ClickAndCollect.Controllers
 
             int preparatorID = HttpContext.Session.GetInt32("Id").Value;
             string firstName = HttpContext.Session.GetString("FirstName");
-
             int storeId = HttpContext.Session.GetInt32("storeId").Value;
 
             try
@@ -393,7 +373,7 @@ namespace ClickAndCollect.Controllers
                 Preparator currentPreparator = await Preparator.GetPreparatorAsync(preparatorID, storeId, employeeDAL);
                 currentPreparator.FirstName = firstName;
 
-                List<Order> ordersToPrepare = await currentPreparator.GetOrderToPrepareAsync(storeDAL);
+                List<Order> ordersToPrepare = await Preparator.GetOrderToPrepareAsync(storeDAL, currentPreparator);
 
                 if (ordersToPrepare == null || ordersToPrepare.Count == 0)
                 {
@@ -418,18 +398,6 @@ namespace ClickAndCollect.Controllers
                     TempData["Error"] = "You must be logged in to view your profile.";
                     return RedirectToAction("SignUp");
                 }
-                if (HttpContext.Session.GetString("Type") != "Client")
-                {
-                    if (HttpContext.Session.GetString("Type") == "Cashier")
-                    {
-                        return RedirectToAction("IndexCashier");
-                    }
-                    if (HttpContext.Session.GetString("Type") == "Preparator")
-                    {
-                        return RedirectToAction("IndexPreparator");
-                    }
-                }
-
                 string email = HttpContext.Session.GetString("Email");
                 Client user = await Client.GetClientByEmail(clientDAL, email);
                 return View(user);
@@ -471,7 +439,6 @@ namespace ClickAndCollect.Controllers
                 {
                     return View(user);
                 }
-                //modification of user in DB
                 int rows = await clientDAL.UpdateClientInfo(user);
 
                 if (rows == 0)
@@ -498,17 +465,6 @@ namespace ClickAndCollect.Controllers
                 {
                     TempData["Error"] = "You must be logged in to view your shopping cart.";
                     return RedirectToAction("SignUp");
-                }
-                if(HttpContext.Session.GetString("Type") != "Client")
-                {
-                    if(HttpContext.Session.GetString("Type") == "Cashier")
-                    {
-                        return RedirectToAction("IndexCashier");
-                    }
-                    if (HttpContext.Session.GetString("Type") == "Preparator")
-                    {
-                        return RedirectToAction("IndexPreparator");
-                    }
                 }
 
                 string json = HttpContext.Session.GetString("Cart");
@@ -641,8 +597,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-
-        // POST: Remove one item from order
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveItemFromOrder(int orderId, int articleId)
@@ -661,7 +615,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-        // POST: Update box counts on an order
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateBoxes(int orderId, int boxUsed, int boxReturned)
@@ -676,9 +629,7 @@ namespace ClickAndCollect.Controllers
                     TempData["Error"] = "Order not found.";
                     return RedirectToAction("IndexCashier");
                 }
-                order.BoxUsed = boxUsed;
-                order.BoxReturned = boxReturned;
-                await orderDAL.FinalizeOrderAsync(order);
+                await order.UpdateBoxesAsync(orderDAL, boxUsed, boxReturned);
                 return RedirectToAction("FinalizeOrder", new { orderId = orderId });
             }
             catch (Exception ex)
@@ -688,7 +639,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-        // POST: Cancel — go back to IndexCashier, reset status to Prepared
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelFinalizeOrder(int orderId)
@@ -699,10 +649,7 @@ namespace ClickAndCollect.Controllers
             {
                 Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
                 if (order != null)
-                {
-                    order.Status = "Prepared";
-                    await orderDAL.FinalizeOrderAsync(order);
-                }
+                    await order.ChangeStatusAsync(orderDAL, "Prepared");
                 return RedirectToAction("IndexCashier");
             }
             catch (Exception ex)
@@ -712,8 +659,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-
-        // GET: Show order details for preparation
         public async Task<IActionResult> PrepareOrder(int orderId)
         {
             if (HttpContext.Session.GetString("Type") != "Preparator")
@@ -730,13 +675,8 @@ namespace ClickAndCollect.Controllers
                     return RedirectToAction("IndexPreparator");
                 }
 
-                // Mark as InPreparation as soon as preparator opens it
                 if (order.Status == "Ordered")
-                {
-                    order.Status = "InPreparation";
-                    order.BoxUsed = 0;
-                    await orderDAL.PrepareOrderAsync(order);
-                }
+                    await order.PrepareOrderAsync(orderDAL, 0, "InPreparation");
 
                 return View(order);
             }
@@ -747,7 +687,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-        // POST: Finalize preparation — set boxes + status Prepared
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ClosePrepareOrder(int orderId, int boxUsed)
@@ -782,7 +721,6 @@ namespace ClickAndCollect.Controllers
             }
         }
 
-        // POST: Cancel preparation — go back, reset to Ordered
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelPrepareOrder(int orderId)
@@ -793,11 +731,7 @@ namespace ClickAndCollect.Controllers
             {
                 Order order = await Order.GetOrderByIdAsync(orderDAL, orderId);
                 if (order != null)
-                {
-                    order.Status = "Ordered";
-                    order.BoxUsed = 0;
-                    await orderDAL.PrepareOrderAsync(order);
-                }
+                    await order.PrepareOrderAsync(orderDAL, 0, "Ordered");
                 return RedirectToAction("IndexPreparator");
             }
             catch (Exception ex)

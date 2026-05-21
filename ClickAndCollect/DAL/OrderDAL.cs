@@ -82,7 +82,6 @@ namespace ClickAndCollect.DAL
             {
                 await con.OpenAsync();
 
-                // 1. Charger la commande + client + timeslot
                 SqlCommand cmdOrder = new SqlCommand(
                     @"SELECT o.orderID,
                              o.boxUsed,
@@ -137,7 +136,6 @@ namespace ClickAndCollect.DAL
                 if (order == null)
                     return null;
 
-                // 2. Charger les OrderLines + Articles
                 SqlCommand cmdLines = new SqlCommand(
                     @"SELECT ol.quantity,
                              a.articleID,
@@ -179,7 +177,6 @@ namespace ClickAndCollect.DAL
             {
                 await con.OpenAsync();
 
-                // Decrease quantity by 1
                 SqlCommand cmdCheck = new SqlCommand(
                     "SELECT quantity FROM OrderLine WHERE orderID = @OrderId AND articleID = @ArticleId", con);
                 cmdCheck.Parameters.AddWithValue("@OrderId", orderId);
@@ -188,7 +185,6 @@ namespace ClickAndCollect.DAL
 
                 if (qty <= 1)
                 {
-                    // Remove the line entirely
                     SqlCommand cmdDel = new SqlCommand(
                         "DELETE FROM OrderLine WHERE orderID = @OrderId AND articleID = @ArticleId", con);
                     cmdDel.Parameters.AddWithValue("@OrderId", orderId);
