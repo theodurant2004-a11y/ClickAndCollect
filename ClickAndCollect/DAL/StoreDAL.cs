@@ -57,6 +57,8 @@ namespace ClickAndCollect.DAL
 
                         Client tempClient = new Client { Id = personID, FirstName = firstName, SurName = lastName };
                         TimeSlot tempTimeSlot = new TimeSlot(date, date.Add(startSp), date.Add(endSp));
+                        Store tempStore = new Store { Id = storeID };
+
                         allOrders.Add(new Order
                         {
                             OrderID = orderId,
@@ -65,7 +67,8 @@ namespace ClickAndCollect.DAL
                             ServiceCharge = serviceCharge,
                             Status = status,
                             Client = tempClient,
-                            TimeSlot = tempTimeSlot
+                            TimeSlot = tempTimeSlot,
+                            Store = tempStore
                         });
                     }
                 }
@@ -74,9 +77,12 @@ namespace ClickAndCollect.DAL
             List<Order> todaysOrders = new List<Order>();
             foreach (Order order in allOrders)
             {
-                if (order.TimeSlot.Date.Date == DateTime.Today)
+                if (order.TimeSlot.Date.Date == DateTime.Today
+                    && order.Store.Id == cashier.StoreID
+                    && order.Status != "Delivered")
                     todaysOrders.Add(order);
             }
+            todaysOrders.Sort((a, b) => a.TimeSlot.StartingHour.CompareTo(b.TimeSlot.StartingHour));
             return todaysOrders;
         }
 
@@ -124,6 +130,8 @@ namespace ClickAndCollect.DAL
 
                         Client tempClient = new Client { Id = personID, FirstName = firstName, SurName = lastName };
                         TimeSlot tempTimeSlot = new TimeSlot(date, date.Add(startSp), date.Add(endSp));
+                        Store tempStore = new Store { Id = storeID };
+
                         allOrders.Add(new Order
                         {
                             OrderID = orderId,
@@ -132,18 +140,23 @@ namespace ClickAndCollect.DAL
                             ServiceCharge = serviceCharge,
                             Status = status,
                             Client = tempClient,
-                            TimeSlot = tempTimeSlot
+                            TimeSlot = tempTimeSlot,
+                            Store = tempStore
                         });
                     }
                 }
             }
 
+            // Filtrage C# : demain, statut Ordered, magasin du préparateur
             List<Order> ordersToPrepare = new List<Order>();
             foreach (Order order in allOrders)
             {
-                if(order.Status == "Ordered" && order.TimeSlot.Date.Date == DateTime.Today.AddDays(1))
+                if (order.Status == "Ordered"
+                    && order.TimeSlot.Date.Date == DateTime.Today.AddDays(1)
+                    && order.Store.Id == preparator.StoreID)
                     ordersToPrepare.Add(order);
             }
+            ordersToPrepare.Sort((a, b) => a.TimeSlot.StartingHour.CompareTo(b.TimeSlot.StartingHour));
             return ordersToPrepare;
         }
 

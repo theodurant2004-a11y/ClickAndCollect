@@ -1,4 +1,5 @@
-﻿@model List<Article>
+﻿@model List<ClickAndCollect.Models.Article>
+@using ClickAndCollect.Models
 @{
     ViewData["Title"] = "Catalog";
     List<Category> categories = ViewBag.Categories as List<Category>;
@@ -9,46 +10,40 @@
 <h1 class="catalog-title mb-4">Product List</h1>
 
 <div class="catalog-container">
-
     <div class="filter-sidebar">
         <h5 class="sidebar-title">Refine your search</h5>
-
         <form method="get" asp-action="Index">
             <p class="filter-group-title">Categories</p>
-
             <div class="form-check custom-filter-radio mb-2">
                 <input class="form-check-input" type="radio" name="category" value="" id="cat_all"
                        @(selectedCategory == null ? "checked" : "") />
                 <label class="form-check-label fst-italic" for="cat_all">All</label>
             </div>
-
             <div class="row g-0">
                 <div class="col-6">
                     @for (int i = 0; i < categories.Count; i += 2)
                     {
                         <div class="form-check custom-filter-radio mb-2">
-                            <input class="form-check-input" type="radio" name="category" value="@categories[i]" id="cat_@categories[i]"
+                            <input class="form-check-input" type="radio" name="category"
+                                   value="@categories[i]" id="cat_@categories[i]"
                                    @(selectedCategory == categories[i].Name ? "checked" : "") />
                             <label class="form-check-label fst-italic" for="cat_@categories[i]">@categories[i]</label>
                         </div>
                     }
                 </div>
-
                 <div class="col-6">
                     @for (int i = 1; i < categories.Count; i += 2)
                     {
                         <div class="form-check custom-filter-radio mb-2">
-                            <input class="form-check-input" type="radio" name="category" value="@categories[i]" id="cat_@categories[i]"
+                            <input class="form-check-input" type="radio" name="category"
+                                   value="@categories[i]" id="cat_@categories[i]"
                                    @(selectedCategory == categories[i].Name ? "checked" : "") />
                             <label class="form-check-label fst-italic" for="cat_@categories[i]">@categories[i]</label>
                         </div>
                     }
                 </div>
             </div>
-
-            <button type="submit" class="btn btn-filter w-100 mt-3">
-                Filter
-            </button>
+            <button type="submit" class="btn btn-filter w-100 mt-3">Filter</button>
         </form>
     </div>
 
@@ -72,5 +67,4 @@
             </div>
         }
     </div>
-
 </div>
