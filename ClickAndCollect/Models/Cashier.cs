@@ -32,7 +32,7 @@ namespace ClickAndCollect.Models
 
         public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL)
         {
-            return await cashierStore.GetTodaysOrdersAsync(storeDAL, this);
+            return await Store.GetTodaysOrdersAsync(storeDAL, this);
         }
     }
 }

@@ -88,7 +88,7 @@ namespace ClickAndCollect.Models
             return await _storeDAL.GetAvailableTimeSlotsAsync(_store);
         }
 
-        public async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL, Cashier cashier)
+        public static async Task<List<Order>> GetTodaysOrdersAsync(IStoreDAL storeDAL, Cashier cashier)
         {
             return await storeDAL.GetTodaysOrdersAsync(cashier);
         }

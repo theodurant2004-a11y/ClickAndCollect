@@ -29,6 +29,15 @@ namespace ClickAndCollect.Controllers
         {
             try
             {
+                if (HttpContext.Session.GetString("Type") == "Cashier")
+                {
+                    return RedirectToAction("IndexCashier");
+                }
+                if (HttpContext.Session.GetString("Type") == "Preparator")
+                {
+                    return RedirectToAction("IndexPreparator");
+                }
+
                 List<Article> articles = await Article.GetAllArticlesAsync(articleDAL);
                 List<Category> categories = await Category.GetCategoriesAsync(categoryDAL);
 
@@ -197,7 +206,9 @@ namespace ClickAndCollect.Controllers
         {
             return View();
         }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Connexion(Client loginInfo)
         {
             var client = await clientDAL.GetClientByEmail(loginInfo.Email);
@@ -250,11 +261,13 @@ namespace ClickAndCollect.Controllers
             ViewBag.ErrorMessage = "Invalid email or password";
             return View();
         }
+
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Connexion");
         }
+
         public async Task<IActionResult> IndexCashier()
         {
             if (HttpContext.Session.GetString("Type") != "Cashier" ||
@@ -405,6 +418,18 @@ namespace ClickAndCollect.Controllers
                     TempData["Error"] = "You must be logged in to view your profile.";
                     return RedirectToAction("SignUp");
                 }
+                if (HttpContext.Session.GetString("Type") != "Client")
+                {
+                    if (HttpContext.Session.GetString("Type") == "Cashier")
+                    {
+                        return RedirectToAction("IndexCashier");
+                    }
+                    if (HttpContext.Session.GetString("Type") == "Preparator")
+                    {
+                        return RedirectToAction("IndexPreparator");
+                    }
+                }
+
                 string email = HttpContext.Session.GetString("Email");
                 Client user = await Client.GetClientByEmail(clientDAL, email);
                 return View(user);
@@ -473,6 +498,17 @@ namespace ClickAndCollect.Controllers
                 {
                     TempData["Error"] = "You must be logged in to view your shopping cart.";
                     return RedirectToAction("SignUp");
+                }
+                if(HttpContext.Session.GetString("Type") != "Client")
+                {
+                    if(HttpContext.Session.GetString("Type") == "Cashier")
+                    {
+                        return RedirectToAction("IndexCashier");
+                    }
+                    if (HttpContext.Session.GetString("Type") == "Preparator")
+                    {
+                        return RedirectToAction("IndexPreparator");
+                    }
                 }
 
                 string json = HttpContext.Session.GetString("Cart");
