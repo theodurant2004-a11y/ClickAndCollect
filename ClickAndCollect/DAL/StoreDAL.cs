@@ -79,7 +79,7 @@ namespace ClickAndCollect.DAL
             {
                 if (order.TimeSlot.Date.Date == DateTime.Today
                     && order.Store.Id == cashier.StoreID
-                    && order.Status != "Delivered")
+                    && order.Status == "Prepared")
                     todaysOrders.Add(order);
             }
             todaysOrders.Sort((a, b) => a.TimeSlot.StartingHour.CompareTo(b.TimeSlot.StartingHour));
